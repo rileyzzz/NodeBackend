@@ -58,14 +58,15 @@ class Node
 		//constantly changing dependency values used for calculation - 1:1 with inputs vector
 		std::vector<Data*> CalculatedInputs;
 
+		//Should this be an input node, have a variable for the input data that can be changed on the fly. This should probably be moved to a subclass at some point
+		Data* InputData;
+
 		typedef Data* (*CalcFunc)(std::vector<Data*>);
 
-		//Data* DefaultCalculate(std::vector<Data*> calcInputsMoved);
 		CalcFunc Calculate;
 
 		Node(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
 		{
-			std::cout << "created node\n";
 			ID = givenID;
 			type = givenType;
 			inputs = givenInputs;
@@ -105,6 +106,8 @@ class Node
 			renderable = new NodeDrawable();
 			renderable->x = x;
 			renderable->y = y;
+
+			std::cout << "Created node " << title << ".\n";
 		}
 };
 

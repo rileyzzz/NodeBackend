@@ -44,17 +44,14 @@ void GetScreenCoordinates(int x, int y, int* sendX, int* sendY)
 Data* CalculateLinkChain(Output* srcLink)
 {
     Node* ParentNode = srcLink->ParentNode;
-    /*std::cout << "Calculating link chain for node: ";
-    std::cout << ParentNode->title;
-    std::cout << "\n";*/
+
     if (ParentNode)
     {
         Data* returnval = nullptr;
         switch (ParentNode->type)
         {
         case Node::Node_Type::Node_Input:
-            std::cout << "Input node found\n";
-            returnval = new NodeInteger(5);
+            returnval = ParentNode->InputData;
             break;
 
         case Node::Node_Type::Node_Calculation:
@@ -169,6 +166,9 @@ int main(int argc, char* argv[])
     std::vector<Output*> nodeOutputs = CreateOutputs(outPorts);
 
     Node* ExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Example Node", 0, 0);
+
+    //set the initial input value! this is important
+    ExampleNode->InputData = new NodeInteger(5);
 
 
     std::vector<DataPort> inPorts2{ DataPort(Data::Data_Type::Integer) };
