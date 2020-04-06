@@ -74,26 +74,16 @@ class Node
 			//set IO parents
 			if (inputs.size())
 			{
-				/*std::cout << "Registering inputs for ";
-				std::cout << givenTitle;
-				std::cout << ".\n";*/
 				for (int iter = 0; iter < inputs.size(); iter++)
 				{
-					//std::cout << "test 1";
 					inputs[iter]->ParentNode = this;
-					//std::cout << "test 2";
 				}
 			}
 			if (outputs.size())
 			{
-				/*std::cout << "Registering outputs for ";
-				std::cout << givenTitle;
-				std::cout << ".\n";*/
 				for (int iter = 0; iter < outputs.size(); iter++)
 				{
-					//std::cout << "test 3";
 					outputs[iter]->ParentNode = this;
-					//std::cout << "test 4";
 				}
 			}
 			

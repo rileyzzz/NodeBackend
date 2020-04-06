@@ -178,8 +178,6 @@ int main(int argc, char* argv[])
 
     Node* ExampleNode2 = CreateNode(Node::Node_Type::Node_Calculation, nodeInputs2, nodeOutputs2, "Example Node 2", 150, 0, ExampleMultiply);
     
-    //ExampleNode2->Calculate
-
 
     std::vector<DataPort> inPorts3{ DataPort(Data::Data_Type::Integer) };
     std::vector<DataPort> outPorts3{ };
@@ -191,8 +189,8 @@ int main(int argc, char* argv[])
     //Setup example connections
     ExampleNode3->inputs[0]->link = ExampleNode2->outputs[0];
     ExampleNode2->inputs[0]->link = ExampleNode->outputs[0];
-
   
+
     Data* outputresult = CalculateOutput(ExampleNode3);
     NodeFloat* calcvalue = (NodeFloat*)outputresult;
 
