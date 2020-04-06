@@ -39,8 +39,8 @@ public:
 class NodeFloat : public Data
 {
 public:
-	float value;
-	NodeFloat(float input)
+	double value;
+	NodeFloat(double input)
 	{
 		value = input;
 		type = Data_Type::Float;

@@ -99,9 +99,9 @@ Data* CalculateOutput(Node* output)
 Data* ExampleMultiply(std::vector<Data*> calcInputsMoved)
 {
     NodeInteger* input1 = (NodeInteger*)calcInputsMoved[0];
-    int value1 = input1->value;
-
-    NodeInteger* returndata = new NodeInteger(value1*5);
+    double value1 = input1->value;
+    //NodeInteger* returndata = new NodeInteger(value1 * 5);
+    NodeFloat* returndata = new NodeFloat(value1 / 20);
     return returndata;
 }
 
@@ -199,10 +199,11 @@ int main(int argc, char* argv[])
 
   
     Data* outputresult = CalculateOutput(ExampleNode3);
-    NodeInteger* calcvalue = (NodeInteger*)outputresult;
+    //NodeInteger* calcvalue = (NodeInteger*)outputresult;
+    NodeFloat* calcvalue = (NodeFloat*)outputresult;
     //NodeInteger& cval = static_cast<NodeInteger&>(outputresult);
     std::cout << "Output result is: ";
-    if (outputresult->type == Data::Data_Type::Integer)
+    if (outputresult->type == Data::Data_Type::Float)
     {
         std::cout << "success - value is: ";
         std::cout << calcvalue->value;
