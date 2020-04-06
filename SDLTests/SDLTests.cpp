@@ -82,15 +82,11 @@ Data* CalculateOutput(Node* output)
     }
 
     //Loop through every input required for our output node.
-    //std::cout << "output input amount is:";
-    //std::cout << output->inputs.size();
-    //std::cout << "\n";
-
     for (int nodeInputID = 0; nodeInputID < output->inputs.size(); nodeInputID++)
     {
         Input* nodeInput = output->inputs[nodeInputID];
 
-        //Recursion through entire link chain
+        //Recursion through entire link tree.
         output->CalculatedInputs.push_back(CalculateLinkChain(nodeInput->link));
     }
     return output->CalculatedInputs[0];
@@ -100,9 +96,8 @@ Data* ExampleMultiply(std::vector<Data*> calcInputsMoved)
 {
     NodeInteger* input1 = (NodeInteger*)calcInputsMoved[0];
     double value1 = input1->value;
-    //NodeInteger* returndata = new NodeInteger(value1 * 5);
-    NodeFloat* returndata = new NodeFloat(value1 / 20);
-    return returndata;
+
+    return new NodeFloat(value1 / 20);
 }
 
 int main(int argc, char* argv[])
@@ -199,9 +194,8 @@ int main(int argc, char* argv[])
 
   
     Data* outputresult = CalculateOutput(ExampleNode3);
-    //NodeInteger* calcvalue = (NodeInteger*)outputresult;
     NodeFloat* calcvalue = (NodeFloat*)outputresult;
-    //NodeInteger& cval = static_cast<NodeInteger&>(outputresult);
+
     std::cout << "Output result is: ";
     if (outputresult->type == Data::Data_Type::Float)
     {
@@ -315,8 +309,7 @@ int main(int argc, char* argv[])
             MMoffsetY = mouseY - startY;
             
         }
-        //std::cout << zoomLevel;
-        //std::cout << "\n";
+
         dest.w = 48 + 32 * zoomLevel;
         dest.h = 48 + 32 * zoomLevel;
         // clears the screen 
@@ -363,19 +356,9 @@ int main(int argc, char* argv[])
             NodeDrawable* renderable = curNode->renderable;
             int drawX, drawY;
             GetScreenCoordinates(renderable->x, renderable->y, &drawX, &drawY);
-            //std::cout << "X: ";
-            //std::cout << drawX;
-            //std::cout << "\n";
-            //std::cout << "Y: ";
-            //std::cout << drawY;
-            //std::cout << "\n";
-            
 
             Nodedest.x = drawX;
             Nodedest.y = drawY;
-
-            //Nodedest.x = 500;
-            //Nodedest.y = 500;
 
             SDL_RenderCopy(rend, Nodetex, NULL, &Nodedest);
         }
@@ -402,15 +385,3 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
