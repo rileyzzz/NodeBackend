@@ -17,11 +17,16 @@ Data* Node::CalculateInputs()
 
 void ActionNode::Run()
 {
-    if (RunCalled)
+    if (type == Node::Node_Type::Node_Action)
     {
         //Do our predefined action.
-        RunCalled();
+        if (inputs.size())
+        {
+            CalculateInputs();
+        }
+        RunCalled(CalculatedInputs);
     }
+    std::cout << "Node " << title << " has been called.\n";
     if (Next)
     {
         //Continue the chain.

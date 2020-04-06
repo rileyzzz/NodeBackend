@@ -118,12 +118,12 @@ public:
 	//Optional - can be called by the run function
 	std::vector<ActionNode*> OutputActions;
 
-	typedef bool (*RunFunc)();
+	typedef bool (*RunFunc)(std::vector<Data*>);
 	RunFunc RunCalled;
 
 	void Run();
 
-	ActionNode(int givenID, Node::Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, bool (*f)() = nullptr)
+	ActionNode(int givenID, Node::Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, bool (*f)(std::vector<Data*>) = nullptr)
 	{
 		ID = givenID;
 		type = givenType;

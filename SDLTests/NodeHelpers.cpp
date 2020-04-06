@@ -33,7 +33,9 @@ Data* CalculateLinkChain(Output* srcLink)
         case Node::Node_Type::Node_Input:
             returnval = ParentNode->InputData;
             break;
-
+        case Node::Node_Type::Node_Event:
+            returnval = ParentNode->InputData;
+            break;
         case Node::Node_Type::Node_Calculation:
             if (ParentNode->inputs.size())
             {

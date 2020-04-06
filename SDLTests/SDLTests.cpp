@@ -34,7 +34,7 @@ static void DestroyNode(int id)
     NodeStack.erase(NodeStack.begin() + id);
 }
 
-ActionNode* CreateActionNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, bool (*f)() = nullptr)
+ActionNode* CreateActionNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, bool (*f)(std::vector<Data*>) = nullptr)
 {
     ActionNode* NewNode = new ActionNode(IDcount, type, inputs, outputs, title, x, y, f);
     IDcount++;
@@ -78,6 +78,14 @@ Data* ExampleMultiply(std::vector<Data*> calcInputsMoved)
     NodeNumeric* input2 = (NodeNumeric*)calcInputsMoved[1];
     double value2 = input2->value;
     return new NodeFloat(value1 * value2);
+}
+
+bool ExamplePrint(std::vector<Data*> dataInputs)
+{
+    NodeString* input = (NodeString*)dataInputs[0];
+    
+    std::cout << input->value << "\n";
+    return true;
 }
 
 int main(int argc, char* argv[])
@@ -202,19 +210,30 @@ int main(int argc, char* argv[])
 
     //Example Action Graph
     std::vector<DataPort> EventinPorts{  };
-    std::vector<DataPort> EventoutPorts{ DataPort(Data::Data_Type::Integer) };
+    std::vector<DataPort> EventoutPorts{ DataPort(Data::Data_Type::String) };
     std::vector<Input*> EventnodeInputs;
-    std::vector<Output*> EventnodeOutputs = CreateOutputs(outPorts);
+    std::vector<Output*> EventnodeOutputs = CreateOutputs(EventoutPorts);
 
-    //DataNode* EventExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Example Input", 0, 0);
-
-
+    ActionNode* EventExampleNode = CreateActionNode(Node::Node_Type::Node_Event, EventnodeInputs, EventnodeOutputs, "Event Tick", 0, 200);
 
 
+    std::vector<DataPort> PrintinPorts{ DataPort(Data::Data_Type::String) };
+    std::vector<DataPort> PrintoutPorts{  };
+    std::vector<Input*> PrintnodeInputs = CreateInputs(PrintinPorts);
+    std::vector<Output*> PrintnodeOutputs;
 
+    ActionNode* PrintExampleNode = CreateActionNode(Node::Node_Type::Node_Action, PrintnodeInputs, PrintnodeOutputs, "Print", 150, 200, ExamplePrint);
 
+    //Link the flow between event and print
+    EventExampleNode->Next = PrintExampleNode;
 
+    //Link the IO string
+    PrintExampleNode->inputs[0]->link = EventExampleNode->outputs[0];
 
+    //Once again, event input data is managed through the InputData variable, since an event can also act as an input - completely optional
+    EventExampleNode->InputData = new NodeString("Testing from the Event node!");
+
+    EventExampleNode->Run();
 
 
 
