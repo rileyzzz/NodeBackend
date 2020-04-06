@@ -65,39 +65,96 @@ class Node
 
 		CalcFunc Calculate;
 
-		Node(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
-		{
-			ID = givenID;
-			type = givenType;
-			inputs = givenInputs;
-			outputs = givenOutputs;
-			//set IO parents
-			if (inputs.size())
-			{
-				for (int iter = 0; iter < inputs.size(); iter++)
-				{
-					inputs[iter]->ParentNode = this;
-				}
-			}
-			if (outputs.size())
-			{
-				for (int iter = 0; iter < outputs.size(); iter++)
-				{
-					outputs[iter]->ParentNode = this;
-				}
-			}
-			
-			if (f)
-			{
-				Calculate = (*f);
-			}
-
-			title = givenTitle;
-			renderable = new NodeDrawable();
-			renderable->x = x;
-			renderable->y = y;
-
-			std::cout << "Created node " << title << ".\n";
-		}
+		Data* CalculateInputs();
 };
 
+class DataNode : public Node
+{
+public:
+	DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
+	{
+		ID = givenID;
+		type = givenType;
+		inputs = givenInputs;
+		outputs = givenOutputs;
+		//set IO parents
+		if (inputs.size())
+		{
+			for (int iter = 0; iter < inputs.size(); iter++)
+			{
+				inputs[iter]->ParentNode = this;
+			}
+		}
+		if (outputs.size())
+		{
+			for (int iter = 0; iter < outputs.size(); iter++)
+			{
+				outputs[iter]->ParentNode = this;
+			}
+		}
+
+		if (f)
+		{
+			Calculate = (*f);
+		}
+
+		title = givenTitle;
+		renderable = new NodeDrawable();
+		renderable->x = x;
+		renderable->y = y;
+
+		std::cout << "Created node " << title << ".\n";
+	}
+};
+
+class ActionNode : public Node
+{
+public:
+	//Action nodes are a bit different; they can also have a predefined next and previous. Since only one input can be linked per IO, it is a sequence. They can, however, have several action outputs, so we must account for this.
+	//They will take a boolean 
+	ActionNode* Previous;
+	ActionNode* Next;
+
+	//Optional - can be called by the run function
+	std::vector<ActionNode*> OutputActions;
+
+	typedef bool (*RunFunc)();
+	RunFunc RunCalled;
+
+	void Run();
+
+	ActionNode(int givenID, Node::Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, bool (*f)() = nullptr)
+	{
+		ID = givenID;
+		type = givenType;
+		inputs = givenInputs;
+		outputs = givenOutputs;
+		//set IO parents
+		if (inputs.size())
+		{
+			for (int iter = 0; iter < inputs.size(); iter++)
+			{
+				inputs[iter]->ParentNode = this;
+			}
+		}
+		if (outputs.size())
+		{
+			for (int iter = 0; iter < outputs.size(); iter++)
+			{
+				outputs[iter]->ParentNode = this;
+			}
+		}
+
+		if (f)
+		{
+			RunCalled = (*f);
+		}
+
+		title = givenTitle;
+		renderable = new NodeDrawable();
+		renderable->x = x;
+		renderable->y = y;
+
+		std::cout << "Created node " << title << ".\n";
+	}
+};

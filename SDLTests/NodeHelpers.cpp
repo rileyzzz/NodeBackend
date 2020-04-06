@@ -20,3 +20,32 @@ std::vector<Output*> CreateOutputs(std::vector<DataPort> itemarray)
     }
     return createdOutputs;
 }
+
+Data* CalculateLinkChain(Output* srcLink)
+{
+    Node* ParentNode = srcLink->ParentNode;
+
+    if (ParentNode)
+    {
+        Data* returnval = nullptr;
+        switch (ParentNode->type)
+        {
+        case Node::Node_Type::Node_Input:
+            returnval = ParentNode->InputData;
+            break;
+
+        case Node::Node_Type::Node_Calculation:
+            if (ParentNode->inputs.size())
+            {
+                for (int dependency = 0; dependency < ParentNode->inputs.size(); dependency++)
+                {
+                    ParentNode->CalculatedInputs.push_back(CalculateLinkChain(ParentNode->inputs[dependency]->link));
+                }
+                returnval = ParentNode->Calculate(ParentNode->CalculatedInputs);
+            }
+            break;
+
+        }
+        return returnval;
+    }
+}

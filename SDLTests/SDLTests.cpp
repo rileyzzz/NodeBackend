@@ -21,9 +21,9 @@ int MMoffsetX = 0;
 int MMoffsetY = 0;
 int gridParallaxAmount = 1;
 
-Node* CreateNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
+DataNode* CreateNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
 {
-    Node* NewNode = new Node(IDcount, type, inputs, outputs, title, x, y, f);
+    DataNode* NewNode = new DataNode(IDcount, type, inputs, outputs, title, x, y, f);
     IDcount++;
     NodeStack.push_back(NewNode);
     return NewNode;
@@ -34,6 +34,16 @@ static void DestroyNode(int id)
     NodeStack.erase(NodeStack.begin() + id);
 }
 
+ActionNode* CreateActionNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, bool (*f)() = nullptr)
+{
+    ActionNode* NewNode = new ActionNode(IDcount, type, inputs, outputs, title, x, y, f);
+    IDcount++;
+    NodeStack.push_back(NewNode);
+    return NewNode;
+}
+
+
+
 void GetScreenCoordinates(int x, int y, int* sendX, int* sendY)
 {
     //int returnarr[2];
@@ -41,53 +51,25 @@ void GetScreenCoordinates(int x, int y, int* sendX, int* sendY)
     *sendY = (gridoffsetY + MMoffsetY / gridParallaxAmount) + y;
 }
 
-Data* CalculateLinkChain(Output* srcLink)
-{
-    Node* ParentNode = srcLink->ParentNode;
 
-    if (ParentNode)
-    {
-        Data* returnval = nullptr;
-        switch (ParentNode->type)
-        {
-        case Node::Node_Type::Node_Input:
-            returnval = ParentNode->InputData;
-            break;
-
-        case Node::Node_Type::Node_Calculation:
-            if (ParentNode->inputs.size())
-            {
-                for (int dependency = 0; dependency < ParentNode->inputs.size(); dependency++)
-                {
-                    ParentNode->CalculatedInputs.push_back(CalculateLinkChain(ParentNode->inputs[dependency]->link));
-                }
-                returnval = ParentNode->Calculate(ParentNode->CalculatedInputs);
-            }
-            break;
-
-        }
-        return returnval;
-    }
-}
-
-Data* CalculateOutput(Node* output)
-{
-    if (output->type != Node::Node_Type::Node_Output)
-    {
-        std::cout << "This node is not of type output.";
-        return new NodeNone();
-    }
-
-    //Loop through every input required for our output node.
-    for (int nodeInputID = 0; nodeInputID < output->inputs.size(); nodeInputID++)
-    {
-        Input* nodeInput = output->inputs[nodeInputID];
-
-        //Recursion through entire link tree.
-        output->CalculatedInputs.push_back(CalculateLinkChain(nodeInput->link));
-    }
-    return output->CalculatedInputs[0];
-}
+//Data* CalculateOutput(DataNode* output)
+//{
+//    if (output->type != Node::Node_Type::Node_Output)
+//    {
+//        std::cout << "This node is not of type output.";
+//        return new NodeNone();
+//    }
+//
+//    //Loop through every input required for our output node.
+//    for (int nodeInputID = 0; nodeInputID < output->inputs.size(); nodeInputID++)
+//    {
+//        Input* nodeInput = output->inputs[nodeInputID];
+//
+//        //Recursion through entire link tree.
+//        output->CalculatedInputs.push_back(CalculateLinkChain(nodeInput->link));
+//    }
+//    return output->CalculatedInputs[0];
+//}
 
 Data* ExampleMultiply(std::vector<Data*> calcInputsMoved)
 {
@@ -166,29 +148,29 @@ int main(int argc, char* argv[])
     std::vector<Input*> nodeInputs;
     std::vector<Output*> nodeOutputs = CreateOutputs(outPorts);
 
-    Node* ExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Example Input", 0, 0);
+    DataNode* ExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Example Input", 0, 0);
 
     //set the initial input value! this is important
     ExampleNode->InputData = new NodeInteger(5);
 
 
     std::vector<DataPort> tempinPorts{  };
-    std::vector<DataPort> tempoutPorts{ DataPort(Data::Data_Type::Integer) };
+    std::vector<DataPort> tempoutPorts{ DataPort(Data::Data_Type::Float) };
     std::vector<Input*> tempnodeInputs;
     std::vector<Output*> tempnodeOutputs = CreateOutputs(tempoutPorts);
 
-    Node* tempExampleNode = CreateNode(Node::Node_Type::Node_Input, tempnodeInputs, tempnodeOutputs, "Example Input 2", 0, 0);
+    DataNode* tempExampleNode = CreateNode(Node::Node_Type::Node_Input, tempnodeInputs, tempnodeOutputs, "Example Input 2", 0, 0);
 
     //set the initial input value! this is important
     ExampleNode->InputData = new NodeInteger(5);
-    tempExampleNode->InputData = new NodeInteger(4);
+    tempExampleNode->InputData = new NodeFloat(2.5);
 
     std::vector<DataPort> inPorts2{ DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) };
     std::vector<DataPort> outPorts2{ DataPort(Data::Data_Type::Float) };
     std::vector<Input*> nodeInputs2 = CreateInputs(inPorts2);
     std::vector<Output*> nodeOutputs2 = CreateOutputs(outPorts2);
 
-    Node* ExampleNode2 = CreateNode(Node::Node_Type::Node_Calculation, nodeInputs2, nodeOutputs2, "Example Node 2", 150, 0, ExampleMultiply);
+    DataNode* ExampleNode2 = CreateNode(Node::Node_Type::Node_Calculation, nodeInputs2, nodeOutputs2, "Example Node 2", 150, 0, ExampleMultiply);
     
 
     std::vector<DataPort> inPorts3{ DataPort(Data::Data_Type::Integer) };
@@ -196,14 +178,14 @@ int main(int argc, char* argv[])
     std::vector<Input*> nodeInputs3 = CreateInputs(inPorts3);
     std::vector<Output*> nodeOutputs3;
 
-    Node* ExampleNode3 = CreateNode(Node::Node_Type::Node_Output, nodeInputs3, nodeOutputs3, "Output", 300, 0);
+    DataNode* ExampleNode3 = CreateNode(Node::Node_Type::Node_Output, nodeInputs3, nodeOutputs3, "Output", 300, 0);
 
     //Setup example connections
     ExampleNode3->inputs[0]->link = ExampleNode2->outputs[0];
     ExampleNode2->inputs[0]->link = ExampleNode->outputs[0];
     ExampleNode2->inputs[1]->link = tempExampleNode->outputs[0];
 
-    Data* outputresult = CalculateOutput(ExampleNode3);
+    Data* outputresult = ExampleNode3->CalculateInputs();
     NodeFloat* calcvalue = (NodeFloat*)outputresult;
 
     std::cout << "Output result is: ";
@@ -216,6 +198,27 @@ int main(int argc, char* argv[])
         std::cout << "fail";
     }
     std::cout << "\n";
+
+
+    //Example Action Graph
+    std::vector<DataPort> EventinPorts{  };
+    std::vector<DataPort> EventoutPorts{ DataPort(Data::Data_Type::Integer) };
+    std::vector<Input*> EventnodeInputs;
+    std::vector<Output*> EventnodeOutputs = CreateOutputs(outPorts);
+
+    //DataNode* EventExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Example Input", 0, 0);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     //Node texture

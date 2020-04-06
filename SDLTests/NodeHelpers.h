@@ -5,3 +5,5 @@
 std::vector<Input*> CreateInputs(std::vector<DataPort> itemarray);
 
 std::vector<Output*> CreateOutputs(std::vector<DataPort> itemarray);
+
+Data* CalculateLinkChain(Output* srcLink);
