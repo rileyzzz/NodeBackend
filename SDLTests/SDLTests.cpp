@@ -19,7 +19,7 @@ int gridoffsetX = 0;
 int gridoffsetY = 0;
 int MMoffsetX = 0;
 int MMoffsetY = 0;
-int gridParallaxAmount = 1;
+int gridParallaxAmount = 4;
 
 DataNode* CreateNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
 {
@@ -43,34 +43,6 @@ ActionNode* CreateActionNode(Node::Node_Type type, std::vector<Input*> inputs, s
 }
 
 
-
-void GetScreenCoordinates(int x, int y, int* sendX, int* sendY)
-{
-    //int returnarr[2];
-    *sendX = (gridoffsetX + MMoffsetX / gridParallaxAmount) + x;
-    *sendY = (gridoffsetY + MMoffsetY / gridParallaxAmount) + y;
-}
-
-
-//Data* CalculateOutput(DataNode* output)
-//{
-//    if (output->type != Node::Node_Type::Node_Output)
-//    {
-//        std::cout << "This node is not of type output.";
-//        return new NodeNone();
-//    }
-//
-//    //Loop through every input required for our output node.
-//    for (int nodeInputID = 0; nodeInputID < output->inputs.size(); nodeInputID++)
-//    {
-//        Input* nodeInput = output->inputs[nodeInputID];
-//
-//        //Recursion through entire link tree.
-//        output->CalculatedInputs.push_back(CalculateLinkChain(nodeInput->link));
-//    }
-//    return output->CalculatedInputs[0];
-//}
-
 Data* ExampleMultiply(std::vector<Data*> calcInputsMoved)
 {
     NodeNumeric* input1 = (NodeNumeric*)calcInputsMoved[0];
@@ -83,9 +55,16 @@ Data* ExampleMultiply(std::vector<Data*> calcInputsMoved)
 bool ExamplePrint(std::vector<Data*> dataInputs)
 {
     NodeString* input = (NodeString*)dataInputs[0];
-    
+
     std::cout << input->value << "\n";
     return true;
+}
+
+void GetScreenCoordinates(int x, int y, int* sendX, int* sendY)
+{
+    //int returnarr[2];
+    *sendX = (gridoffsetX + MMoffsetX) + x;
+    *sendY = (gridoffsetY + MMoffsetY) + y;
 }
 
 int main(int argc, char* argv[])
@@ -101,6 +80,12 @@ int main(int argc, char* argv[])
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         scrw, scrh, 0);
+    //int scrw = 3840;
+    //int scrh = 2160;
+    //SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
+    //    SDL_WINDOWPOS_CENTERED,
+    //    SDL_WINDOWPOS_CENTERED,
+    //    scrw, scrh, SDL_WINDOW_FULLSCREEN);
 
     // triggers the program that controls 
     // your graphics hardware and sets flags 
@@ -314,8 +299,8 @@ int main(int argc, char* argv[])
                 case SDL_BUTTON_MIDDLE:
                     std::cout << "Middle mouse released\n";
                     MiddleMouse = false;
-                    gridoffsetX += (MMoffsetX / gridParallaxAmount);
-                    gridoffsetY += (MMoffsetY / gridParallaxAmount);
+                    gridoffsetX += (MMoffsetX);
+                    gridoffsetY += (MMoffsetY);
                     MMoffsetX = 0;
                     MMoffsetY = 0;
                     break;
@@ -355,10 +340,10 @@ int main(int argc, char* argv[])
             for (int myY = 0; myY <= ceil(scrw / dest.h) + 2; myY++)
             {
                 // sets initial x-position of object 
-                dest.x = (myX - 1) * dest.w + ((gridoffsetX + MMoffsetX / gridParallaxAmount) % dest.w);
+                dest.x = (myX - 1) * dest.w + ((gridoffsetX + MMoffsetX) / gridParallaxAmount % dest.w);
 
                 // sets initial y-position of object 
-                dest.y = (myY - 1) * dest.h + ((gridoffsetY + MMoffsetY / gridParallaxAmount) % dest.h);
+                dest.y = (myY - 1) * dest.h + ((gridoffsetY + MMoffsetY) / gridParallaxAmount % dest.h);
 
                 SDL_RenderCopy(rend, tex, NULL, &dest);
             }
