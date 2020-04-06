@@ -8,10 +8,17 @@ public:
 		Integer,
 		Float,
 		String,
+		Numeric,
 		Weird,
 		None
 	};
 	Data_Type type;
+};
+
+class NodeNumeric : public Data
+{
+public:
+	double value = 0;
 };
 
 class NodeBoolean : public Data
@@ -25,10 +32,9 @@ public:
 	}
 };
 
-class NodeInteger : public Data
+class NodeInteger : public NodeNumeric
 {
 public:
-	int value;
 	NodeInteger(int input)
 	{
 		value = input;
@@ -36,10 +42,9 @@ public:
 	}
 };
 
-class NodeFloat : public Data
+class NodeFloat : public NodeNumeric
 {
 public:
-	double value;
 	NodeFloat(double input)
 	{
 		value = input;

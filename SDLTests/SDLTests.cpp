@@ -91,10 +91,11 @@ Data* CalculateOutput(Node* output)
 
 Data* ExampleMultiply(std::vector<Data*> calcInputsMoved)
 {
-    NodeInteger* input1 = (NodeInteger*)calcInputsMoved[0];
+    NodeNumeric* input1 = (NodeNumeric*)calcInputsMoved[0];
     double value1 = input1->value;
-
-    return new NodeFloat(value1 / 20);
+    NodeNumeric* input2 = (NodeNumeric*)calcInputsMoved[1];
+    double value2 = input2->value;
+    return new NodeFloat(value1 * value2);
 }
 
 int main(int argc, char* argv[])
@@ -165,14 +166,25 @@ int main(int argc, char* argv[])
     std::vector<Input*> nodeInputs;
     std::vector<Output*> nodeOutputs = CreateOutputs(outPorts);
 
-    Node* ExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Example Node", 0, 0);
+    Node* ExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Example Input", 0, 0);
 
     //set the initial input value! this is important
     ExampleNode->InputData = new NodeInteger(5);
 
 
-    std::vector<DataPort> inPorts2{ DataPort(Data::Data_Type::Integer) };
-    std::vector<DataPort> outPorts2{ DataPort(Data::Data_Type::Integer) };
+    std::vector<DataPort> tempinPorts{  };
+    std::vector<DataPort> tempoutPorts{ DataPort(Data::Data_Type::Integer) };
+    std::vector<Input*> tempnodeInputs;
+    std::vector<Output*> tempnodeOutputs = CreateOutputs(tempoutPorts);
+
+    Node* tempExampleNode = CreateNode(Node::Node_Type::Node_Input, tempnodeInputs, tempnodeOutputs, "Example Input 2", 0, 0);
+
+    //set the initial input value! this is important
+    ExampleNode->InputData = new NodeInteger(5);
+    tempExampleNode->InputData = new NodeInteger(4);
+
+    std::vector<DataPort> inPorts2{ DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) };
+    std::vector<DataPort> outPorts2{ DataPort(Data::Data_Type::Float) };
     std::vector<Input*> nodeInputs2 = CreateInputs(inPorts2);
     std::vector<Output*> nodeOutputs2 = CreateOutputs(outPorts2);
 
@@ -189,7 +201,7 @@ int main(int argc, char* argv[])
     //Setup example connections
     ExampleNode3->inputs[0]->link = ExampleNode2->outputs[0];
     ExampleNode2->inputs[0]->link = ExampleNode->outputs[0];
-  
+    ExampleNode2->inputs[1]->link = tempExampleNode->outputs[0];
 
     Data* outputresult = CalculateOutput(ExampleNode3);
     NodeFloat* calcvalue = (NodeFloat*)outputresult;
