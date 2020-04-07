@@ -158,12 +158,14 @@
     <ClCompile Include="NodeDrawable.cpp" />
     <ClCompile Include="NodeHelpers.cpp" />
     <ClCompile Include="SDLTests.cpp" />
+    <ClCompile Include="StandardNodes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataType.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="NodeDrawable.h" />
     <ClInclude Include="NodeHelpers.h" />
+    <ClInclude Include="StandardNodes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

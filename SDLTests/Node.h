@@ -12,16 +12,18 @@ class Linkable
 {
 public:
 	Node* ParentNode;
+	const char* Label;
 };
 class Input : public Linkable
 {
 public:
 	Output* link;
 	DataPort port;
-	Input(DataPort subPort)
+	Input(DataPort subPort, const char* InLabel = "Input")
 	{
 		port = subPort;
 		link = nullptr;
+		Label = InLabel;
 	}
 };
 class Output : public Linkable
@@ -29,10 +31,11 @@ class Output : public Linkable
 public:
 	//Input* link;
 	DataPort port;
-	Output(DataPort subPort)
+	Output(DataPort subPort, const char* InLabel = "Output")
 	{
 		port = subPort;
 		//link = nullptr;
+		Label = InLabel;
 	}
 };
 class Node

@@ -33,6 +33,9 @@
     <ClCompile Include="NodeDrawable.cpp">
       <Filter>Source Files\Node</Filter>
     </ClCompile>
+    <ClCompile Include="StandardNodes.cpp">
+      <Filter>Source Files\Node</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Node.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NodeDrawable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardNodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

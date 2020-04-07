@@ -9,9 +9,10 @@
 #include <vector>
 #include "Node.h"
 #include "NodeHelpers.h"
+#include "StandardNodes.h"
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
-
+//each programmable object will contain a nodestack and id count that persist
 int IDcount = 0;
 std::vector<Node*> NodeStack;
 
@@ -43,23 +44,6 @@ ActionNode* CreateActionNode(Node::Node_Type type, std::vector<Input*> inputs, s
 }
 
 
-Data* ExampleMultiply(std::vector<Data*> calcInputsMoved)
-{
-    NodeNumeric* input1 = (NodeNumeric*)calcInputsMoved[0];
-    double value1 = input1->value;
-    NodeNumeric* input2 = (NodeNumeric*)calcInputsMoved[1];
-    double value2 = input2->value;
-    return new NodeFloat(value1 * value2);
-}
-
-bool ExamplePrint(std::vector<Data*> dataInputs)
-{
-    NodeString* input = (NodeString*)dataInputs[0];
-
-    std::cout << input->value << "\n";
-    return true;
-}
-
 void GetScreenCoordinates(int x, int y, int* sendX, int* sendY)
 {
     //int returnarr[2];
@@ -74,12 +58,14 @@ int main(int argc, char* argv[])
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("error initializing SDL: %s\n", SDL_GetError());
     }
+
     int scrw = 1920;
     int scrh = 1080;
     SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         scrw, scrh, 0);
+
     //int scrw = 3840;
     //int scrh = 2160;
     //SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
@@ -155,7 +141,6 @@ int main(int argc, char* argv[])
     DataNode* tempExampleNode = CreateNode(Node::Node_Type::Node_Input, tempnodeInputs, tempnodeOutputs, "Example Input 2", 0, 0);
 
     //set the initial input value! this is important
-    ExampleNode->InputData = new NodeInteger(5);
     tempExampleNode->InputData = new NodeFloat(2.5);
 
     std::vector<DataPort> inPorts2{ DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) };
@@ -163,7 +148,7 @@ int main(int argc, char* argv[])
     std::vector<Input*> nodeInputs2 = CreateInputs(inPorts2);
     std::vector<Output*> nodeOutputs2 = CreateOutputs(outPorts2);
 
-    DataNode* ExampleNode2 = CreateNode(Node::Node_Type::Node_Calculation, nodeInputs2, nodeOutputs2, "Example Node 2", 150, 0, ExampleMultiply);
+    DataNode* ExampleNode2 = CreateNode(Node::Node_Type::Node_Calculation, nodeInputs2, nodeOutputs2, "Example Node 2", 150, 0, NodeMath::Add);
     
 
     std::vector<DataPort> inPorts3{ DataPort(Data::Data_Type::Integer) };
@@ -207,7 +192,7 @@ int main(int argc, char* argv[])
     std::vector<Input*> PrintnodeInputs = CreateInputs(PrintinPorts);
     std::vector<Output*> PrintnodeOutputs;
 
-    ActionNode* PrintExampleNode = CreateActionNode(Node::Node_Type::Node_Action, PrintnodeInputs, PrintnodeOutputs, "Print", 150, 200, ExamplePrint);
+    ActionNode* PrintExampleNode = CreateActionNode(Node::Node_Type::Node_Action, PrintnodeInputs, PrintnodeOutputs, "Print", 150, 200, NodeDebug::Print);
 
     //Link the flow between event and print
     EventExampleNode->Next = PrintExampleNode;
@@ -239,7 +224,7 @@ int main(int argc, char* argv[])
     // animation loop 
     while (!close) {
         SDL_Event event;
-
+        
         // Events mangement 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -352,6 +337,8 @@ int main(int argc, char* argv[])
         //Draw Node List BG
         if (showNodeList)
         {
+            //temp for profiling
+            EventExampleNode->Run();
             SDL_Rect ListElement;
             ListElement.w = scrw;
             ListElement.h = scrh / 5;
