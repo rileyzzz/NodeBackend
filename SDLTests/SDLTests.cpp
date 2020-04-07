@@ -15,7 +15,7 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 //each programmable object will contain a nodestack and id count that persist
 int IDcount = 0;
 std::vector<Node*> NodeStack;
-
+std::vector<Link*> LinkStack;
 int gridoffsetX = 0;
 int gridoffsetY = 0;
 int MMoffsetX = 0;
@@ -159,9 +159,12 @@ int main(int argc, char* argv[])
     DataNode* ExampleNode3 = CreateNode(Node::Node_Type::Node_Output, nodeInputs3, nodeOutputs3, "Output", 300, 0);
 
     //Setup example connections
-    ExampleNode3->inputs[0]->link = ExampleNode2->outputs[0];
-    ExampleNode2->inputs[0]->link = ExampleNode->outputs[0];
-    ExampleNode2->inputs[1]->link = tempExampleNode->outputs[0];
+    //ExampleNode3->inputs[0]->link = ExampleNode2->outputs[0];
+    //ExampleNode2->inputs[0]->link = ExampleNode->outputs[0];
+    //ExampleNode2->inputs[1]->link = tempExampleNode->outputs[0];
+    LinkStack.push_back(new Link(ExampleNode3, 0, ExampleNode2, 0));
+    LinkStack.push_back(new Link(ExampleNode2, 0, ExampleNode, 0));
+    LinkStack.push_back(new Link(ExampleNode2, 1, tempExampleNode, 0));
 
     Data* outputresult = ExampleNode3->CalculateInputs();
     NodeFloat* calcvalue = (NodeFloat*)outputresult;
@@ -198,7 +201,8 @@ int main(int argc, char* argv[])
     EventExampleNode->Next = PrintExampleNode;
 
     //Link the IO string
-    PrintExampleNode->inputs[0]->link = EventExampleNode->outputs[0];
+    //PrintExampleNode->inputs[0]->link = EventExampleNode->outputs[0];
+    LinkStack.push_back(new Link(PrintExampleNode, 0, EventExampleNode, 0));
 
     //Once again, event input data is managed through the InputData variable, since an event can also act as an input - completely optional
     EventExampleNode->InputData = new NodeString("Testing from the Event node!");

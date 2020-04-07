@@ -161,3 +161,17 @@ public:
 		std::cout << "Created node " << title << ".\n";
 	}
 };
+
+class Link
+{
+	//Calc nodes only!
+public:
+	Input* LinkInput;
+	Output* LinkOutput;
+	Link(Node* node1, int node1input, Node* node2, int node2input)
+	{
+		LinkInput = node1->inputs[node1input];
+		LinkOutput = node2->outputs[node2input];
+		node1->inputs[node1input]->link = node2->outputs[node2input];
+	}
+};
