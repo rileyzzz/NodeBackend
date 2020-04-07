@@ -211,9 +211,6 @@ int main(int argc, char* argv[])
 
 
 
-
-
-
     //Node texture
     SDL_Surface* Nodesurface;
 

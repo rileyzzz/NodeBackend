@@ -50,4 +50,8 @@ Data* CalculateLinkChain(Output* srcLink)
         }
         return returnval;
     }
+    else
+    {
+        return new NodeNone();
+    }
 }
