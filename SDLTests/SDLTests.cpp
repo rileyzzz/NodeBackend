@@ -308,7 +308,9 @@ int main(int argc, char* argv[])
                                     draggingPort = true;
                                 }
                             }
+                            if (draggingPort) break;
                         }
+                        if (draggingPort) break;
                         //outputs
                         for (int Portcount = 0; Portcount < checkNode->outputs.size(); Portcount++)
                         {
@@ -323,7 +325,9 @@ int main(int argc, char* argv[])
                                     draggingNewPort = true;
                                 }
                             }
+                            if (draggingNewPort) break;
                         }
+                        if (draggingNewPort) break;
                     }
                     if (draggingPort) break;
                     if (draggingNewPort) break;
