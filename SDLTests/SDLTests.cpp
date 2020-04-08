@@ -11,6 +11,7 @@
 #include "NodeHelpers.h"
 #include "StandardNodes.h"
 #include "SDL_ttf.h"
+#include <algorithm>
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
 //each programmable object will contain a nodestack and id count that persist
@@ -122,6 +123,13 @@ int main(int argc, char* argv[])
     bool showNodeList = false;
     bool draggingNode = false;
     Node* currentDrag = nullptr;
+    bool draggingPort = false;
+    DataPort* currentDragPort = nullptr;
+    Linkable* currentDragPortParent = nullptr;
+    bool draggingNewPort = false;
+    DataPort* currentDragNewPort = nullptr;
+    Linkable* currentDragNewPortParent = nullptr;
+
 
     //Create example node
     std::vector<DataPort> inPorts{  };
@@ -265,10 +273,48 @@ int main(int argc, char* argv[])
                 case SDL_BUTTON_LEFT:
                     //std::cout << "Left mouse pressed\n";
 
-                    //drag hit test
+                    //hit test
                     int mouseX, mouseY;
                     SDL_GetMouseState(&mouseX, &mouseY);
 
+                    //port test
+                    for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
+                    {
+                        Node* checkNode = NodeStack[Nodecount];
+                        //inputs
+                        for (int Portcount = 0; Portcount < checkNode->inputs.size(); Portcount++)
+                        {
+                            DataPort* Curport = &checkNode->inputs[Portcount]->port;
+
+                            if (mouseX > Curport->renderX - 4 && mouseX < Curport->renderX + 4)
+                            {
+                                if (mouseY > Curport->renderY - 4 && mouseY < Curport->renderY + 4)
+                                {
+                                    currentDragPort = Curport;
+                                    currentDragPortParent = checkNode->inputs[Portcount];
+                                    draggingPort = true;
+                                }
+                            }
+                        }
+                        //outputs
+                        for (int Portcount = 0; Portcount < checkNode->outputs.size(); Portcount++)
+                        {
+                            DataPort* Curport = &checkNode->outputs[Portcount]->port;
+
+                            if (mouseX > Curport->renderX - 4 && mouseX < Curport->renderX + 4)
+                            {
+                                if (mouseY > Curport->renderY - 4 && mouseY < Curport->renderY + 4)
+                                {
+                                    currentDragNewPort = Curport;
+                                    currentDragNewPortParent = checkNode->outputs[Portcount];
+                                    draggingNewPort = true;
+                                }
+                            }
+                        }
+                    }
+                    if (draggingPort) break;
+                    if (draggingNewPort) break;
+                    //node test
                     for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
                     {
                         Node* checkNode = NodeStack[Nodecount];
@@ -308,8 +354,100 @@ int main(int argc, char* argv[])
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT:
                     //std::cout << "Left mouse released\n";
+                    int mouseX, mouseY;
+                    SDL_GetMouseState(&mouseX, &mouseY);
+                    //port test
+                    for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
+                    {
+                        Node* checkNode = NodeStack[Nodecount];
+
+                        //inputs
+                        if (draggingPort)
+                        {
+                            for (int Portcount = 0; Portcount < checkNode->inputs.size(); Portcount++)
+                            {
+                                DataPort* Curport = &checkNode->inputs[Portcount]->port;
+
+                                if (mouseX > Curport->renderX - 4 && mouseX < Curport->renderX + 4)
+                                {
+                                    if (mouseY > Curport->renderY - 4 && mouseY < Curport->renderY + 4)
+                                    {
+                                        if (currentDragPort != Curport && currentDragPortParent->type == Linkable::Link_Type::Input)
+                                        {
+                                            //std::cout << "Dragged to different output!";
+
+                                            //need to get the linked IO, not the IO itself - this will be out new link source
+                                            Input* movedIO = (Input*)currentDragPortParent;
+                                            Output* other = movedIO->link;
+
+                                            /*if (other)
+                                            {
+                                                std::cout << "yeah it worked";
+                                            }
+                                            else
+                                            {
+                                                std::cout << "didnt work";
+                                            }*/
+
+                                            //destroy both links entirely
+                                            //and remove from link stack
+                                            if (movedIO->currentLink)
+                                            {
+                                                LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), movedIO->currentLink), LinkStack.end());
+                                                Unlink(movedIO->currentLink);
+                                            }
+
+                                            if (checkNode->inputs[Portcount]->currentLink)
+                                            {
+                                                LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), checkNode->inputs[Portcount]->currentLink), LinkStack.end());
+                                                Unlink(checkNode->inputs[Portcount]->currentLink);
+                                            }
+
+                                            LinkStack.push_back(new Link(other, checkNode->inputs[Portcount]));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                       
+
+
+                        //outputs
+                        if (draggingNewPort)
+                        {
+                            for (int Portcount = 0; Portcount < checkNode->inputs.size(); Portcount++)
+                            {
+                                DataPort* Curport = &checkNode->inputs[Portcount]->port;
+
+                                if (mouseX > Curport->renderX - 4 && mouseX < Curport->renderX + 4)
+                                {
+                                    if (mouseY > Curport->renderY - 4 && mouseY < Curport->renderY + 4)
+                                    {
+                                        if (currentDragNewPort != Curport && currentDragNewPortParent->type == Linkable::Link_Type::Output)
+                                        {
+                                            //std::cout << "Dragged to different output!";
+                                            LinkStack.push_back(new Link((Output*)currentDragNewPortParent, checkNode->inputs[Portcount]));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                    }
+                    if (currentDragPortParent && currentDragPortParent->currentLink)
+                    {
+                        LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), currentDragPortParent->currentLink), LinkStack.end());
+                        Unlink(currentDragPortParent->currentLink);
+                    }
+
                     draggingNode = false;
                     currentDrag = nullptr;
+                    draggingPort = false;
+                    currentDragPort = nullptr;
+                    currentDragPortParent = nullptr;
+                    draggingNewPort = false;
+                    currentDragNewPort = nullptr;
+                    currentDragNewPortParent = nullptr;
                     break;
                 case SDL_BUTTON_RIGHT:
                     //std::cout << "Right mouse released\n";
@@ -380,23 +518,32 @@ int main(int argc, char* argv[])
             }
         }
 
-        //Draw Node List BG
-        if (showNodeList)
+        if (draggingPort)
         {
-            //temp for profiling
-            EventExampleNode->Run();
-            SDL_Rect ListElement;
-            ListElement.w = scrw;
-            ListElement.h = scrh / 5;
-            ListElement.x = 0;
-            ListElement.y = scrh - ListElement.h;
+            int mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
 
-            SDL_SetRenderDrawColor(rend, 40, 40, 50, 255);
-            SDL_RenderFillRect(rend, &ListElement);
+            currentDragPort->renderX = mouseX;
+            currentDragPort->renderY = mouseY;
         }
 
-        //Draw Node List FG
-        //TBA
+        if (draggingNewPort)
+        {
+            int mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
+            SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
+            SDL_RenderDrawLine(rend, currentDragNewPortParent->port.renderX, currentDragNewPortParent->port.renderY, mouseX, mouseY);
+        }
+
+        //Draw Links
+        for (int curLink = 0; curLink < LinkStack.size(); curLink++)
+        {
+            Link* current = LinkStack[curLink];
+
+            SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
+            SDL_RenderDrawLine(rend, current->LinkInput->port.renderX, current->LinkInput->port.renderY, current->LinkOutput->port.renderX, current->LinkOutput->port.renderY);
+        }
+
 
         //Draw Nodes
         for (int NodeIter = 0; NodeIter < NodeStack.size(); NodeIter++)
@@ -406,11 +553,6 @@ int main(int argc, char* argv[])
             NodeDrawable* renderable = curNode->renderable;
             int drawX, drawY;
             GetScreenCoordinates(renderable->x, renderable->y, &drawX, &drawY);
-
-            //Nodedest.x = drawX;
-            //Nodedest.y = drawY;
-
-            //SDL_RenderCopy(rend, Nodetex, NULL, &Nodedest);
 
             int inputcount = curNode->inputs.size();
             int outputcount = curNode->outputs.size();
@@ -436,14 +578,6 @@ int main(int argc, char* argv[])
 
             TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", 12); //this opens a font style and sets a size
 
-            //if (Sans == nullptr)
-            //{
-            //    std::cout << "font failed\n";
-            //}
-            //else
-            //{
-            //    std::cout << "font success\n";
-            //}
 
             SDL_Color White = { 255, 255, 255 };  // this is the color in rgb format, maxing out all would give you the color white, and it will be your text's color
 
@@ -464,12 +598,6 @@ int main(int argc, char* argv[])
             
             SDL_DestroyTexture(Message);
             SDL_FreeSurface(nodeMessage);
-
-
-
-
-
-
 
 
             //draw ports
@@ -515,8 +643,13 @@ int main(int argc, char* argv[])
                 Portdest.x = drawX - 4;
                 Portdest.y = topY;
 
-                curNode->inputs[curInput]->port.renderX = Portdest.x + IOSize / 2;
-                curNode->inputs[curInput]->port.renderY = Portdest.y + IOSize / 2;
+                if (&curNode->inputs[curInput]->port != currentDragPort)
+                {
+                    curNode->inputs[curInput]->port.renderX = Portdest.x + IOSize / 2;
+                    curNode->inputs[curInput]->port.renderY = Portdest.y + IOSize / 2;
+                }
+                
+
                 //SDL_QueryTexture(Nodetex, NULL, NULL, &Portdest.w, &Portdest.h);
 
                 SDL_RenderCopy(rend, Nodetex, NULL, &Portdest);
@@ -569,19 +702,23 @@ int main(int argc, char* argv[])
             }
         }
 
-        //Draw Links
-        for (int curLink = 0; curLink < LinkStack.size(); curLink++)
+        //Draw Node List BG
+        if (showNodeList)
         {
-            Link* current = LinkStack[curLink];
+            //temp for profiling
+            EventExampleNode->Run();
+            SDL_Rect ListElement;
+            ListElement.w = scrw;
+            ListElement.h = scrh / 5;
+            ListElement.x = 0;
+            ListElement.y = scrh - ListElement.h;
 
-            int InX = current->LinkInput->port.renderX;
-            int InY = current->LinkInput->port.renderY;
-            int OutX = current->LinkOutput->port.renderX;
-            int OutY = current->LinkOutput->port.renderY;
-
-            SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
-            SDL_RenderDrawLine(rend, InX, InY, OutX, OutY);
+            SDL_SetRenderDrawColor(rend, 40, 40, 50, 255);
+            SDL_RenderFillRect(rend, &ListElement);
         }
+
+        //Draw Node List FG
+        //TBA
 
 
         //End Draw

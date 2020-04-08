@@ -55,3 +55,14 @@ Data* CalculateLinkChain(Output* srcLink)
         return new NodeNone();
     }
 }
+
+void Unlink(Link* inLink)
+{
+    inLink->LinkInput->link = nullptr;
+    inLink->LinkOutput->link = nullptr;
+    inLink->LinkInput->currentLink = nullptr;
+    inLink->LinkOutput->currentLink = nullptr;
+    inLink->LinkInput = nullptr;
+    inLink->LinkOutput = nullptr;
+    inLink = nullptr;
+}

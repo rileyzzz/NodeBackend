@@ -7,35 +7,46 @@ class Input;
 class Output;
 class Node;
 class Linkable;
+class Link;
 
 class Linkable
 {
 public:
 	Node* ParentNode;
 	const char* Label;
+	DataPort port;
+	enum class Link_Type {
+		Input,
+		Output
+	};
+	Link_Type type;
+	Link* currentLink;
 };
 class Input : public Linkable
 {
 public:
 	Output* link;
-	DataPort port;
+	
 	Input(DataPort subPort, const char* InLabel = "Input")
 	{
 		port = subPort;
 		link = nullptr;
 		Label = InLabel;
+		type = Linkable::Link_Type::Input;
+		currentLink = nullptr;
 	}
 };
 class Output : public Linkable
 {
 public:
-	//Input* link;
-	DataPort port;
+	Input* link;
 	Output(DataPort subPort, const char* InLabel = "Output")
 	{
 		port = subPort;
-		//link = nullptr;
+		link = nullptr;
 		Label = InLabel;
+		type = Linkable::Link_Type::Output;
+		currentLink = nullptr;
 	}
 };
 class Node
@@ -174,5 +185,19 @@ public:
 		LinkInput = node1->inputs[node1input];
 		LinkOutput = node2->outputs[node2input];
 		node1->inputs[node1input]->link = node2->outputs[node2input];
+		node2->outputs[node2input]->link = node1->inputs[node1input];
+
+		node1->inputs[node1input]->currentLink = this;
+		node2->outputs[node2input]->currentLink = this;
+	}
+	Link(Output* node1input, Input* node2input)
+	{
+		LinkInput = node2input;
+		LinkOutput = node1input;
+		node1input->link = node2input;
+		node2input->link = node1input;
+
+		node1input->currentLink = this;
+		node2input->currentLink = this;
 	}
 };
