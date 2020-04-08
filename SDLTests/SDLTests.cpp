@@ -10,6 +10,7 @@
 #include "Node.h"
 #include "NodeHelpers.h"
 #include "StandardNodes.h"
+#include "SDL_ttf.h"
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
 //each programmable object will contain a nodestack and id count that persist
@@ -127,7 +128,7 @@ int main(int argc, char* argv[])
     std::vector<Input*> nodeInputs;
     std::vector<Output*> nodeOutputs = CreateOutputs(outPorts);
 
-    DataNode* ExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Example Input", 0, 0);
+    DataNode* ExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Integer Input", 0, -150);
 
     //set the initial input value! this is important
     ExampleNode->InputData = new NodeInteger(5);
@@ -138,7 +139,7 @@ int main(int argc, char* argv[])
     std::vector<Input*> tempnodeInputs;
     std::vector<Output*> tempnodeOutputs = CreateOutputs(tempoutPorts);
 
-    DataNode* tempExampleNode = CreateNode(Node::Node_Type::Node_Input, tempnodeInputs, tempnodeOutputs, "Example Input 2", 0, 0);
+    DataNode* tempExampleNode = CreateNode(Node::Node_Type::Node_Input, tempnodeInputs, tempnodeOutputs, "Float Input", 0, 0);
 
     //set the initial input value! this is important
     tempExampleNode->InputData = new NodeFloat(2.5);
@@ -148,7 +149,7 @@ int main(int argc, char* argv[])
     std::vector<Input*> nodeInputs2 = CreateInputs(inPorts2);
     std::vector<Output*> nodeOutputs2 = CreateOutputs(outPorts2);
 
-    DataNode* ExampleNode2 = CreateNode(Node::Node_Type::Node_Calculation, nodeInputs2, nodeOutputs2, "Example Node 2", 150, 0, NodeMath::Add);
+    DataNode* ExampleNode2 = CreateNode(Node::Node_Type::Node_Calculation, nodeInputs2, nodeOutputs2, "Add", 150, 0, NodeMath::Add);
     
 
     std::vector<DataPort> inPorts3{ DataPort(Data::Data_Type::Integer) };
@@ -221,6 +222,7 @@ int main(int argc, char* argv[])
     SDL_Rect Nodedest;
     SDL_QueryTexture(tex, NULL, NULL, &Nodedest.w, &Nodedest.h);
 
+    
 
     // animation loop 
     while (!close) {
@@ -260,13 +262,13 @@ int main(int argc, char* argv[])
             case SDL_MOUSEBUTTONDOWN:
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT:
-                    std::cout << "Left mouse pressed\n";
+                    //std::cout << "Left mouse pressed\n";
                     break;
                 case SDL_BUTTON_RIGHT:
-                    std::cout << "Right mouse pressed\n";
+                    //std::cout << "Right mouse pressed\n";
                     break;
                 case SDL_BUTTON_MIDDLE:
-                    std::cout << "Middle mouse pressed\n";
+                    //std::cout << "Middle mouse pressed\n";
                     SDL_GetMouseState(&startX, &startY);
                     MiddleMouse = true;
                     MMoffsetX = 0;
@@ -277,13 +279,13 @@ int main(int argc, char* argv[])
             case SDL_MOUSEBUTTONUP:
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT:
-                    std::cout << "Left mouse released\n";
+                    //std::cout << "Left mouse released\n";
                     break;
                 case SDL_BUTTON_RIGHT:
-                    std::cout << "Right mouse released\n";
+                    //std::cout << "Right mouse released\n";
                     break;
                 case SDL_BUTTON_MIDDLE:
-                    std::cout << "Middle mouse released\n";
+                    //std::cout << "Middle mouse released\n";
                     MiddleMouse = false;
                     gridoffsetX += (MMoffsetX);
                     gridoffsetY += (MMoffsetY);
@@ -362,11 +364,179 @@ int main(int argc, char* argv[])
             int drawX, drawY;
             GetScreenCoordinates(renderable->x, renderable->y, &drawX, &drawY);
 
-            Nodedest.x = drawX;
-            Nodedest.y = drawY;
+            //Nodedest.x = drawX;
+            //Nodedest.y = drawY;
 
-            SDL_RenderCopy(rend, Nodetex, NULL, &Nodedest);
+            //SDL_RenderCopy(rend, Nodetex, NULL, &Nodedest);
+
+            int inputcount = curNode->inputs.size();
+            int outputcount = curNode->outputs.size();
+
+            //With margin
+            int PortSize = 24;
+            int midheight = std::fmax(inputcount, outputcount) * PortSize;
+
+            SDL_Rect NodeElement;
+            NodeElement.w = renderable->width;
+            NodeElement.h = renderable->topMargin + midheight + renderable->bottomMargin;
+            NodeElement.x = drawX;
+            NodeElement.y = drawY;
+
+            SDL_SetRenderDrawColor(rend, 40, 40, 50, 255);
+            SDL_RenderFillRect(rend, &NodeElement);
+
+            //Render text
+            TTF_Init();
+
+            TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", 12); //this opens a font style and sets a size
+
+            //if (Sans == nullptr)
+            //{
+            //    std::cout << "font failed\n";
+            //}
+            //else
+            //{
+            //    std::cout << "font success\n";
+            //}
+
+            SDL_Color White = { 255, 255, 255 };  // this is the color in rgb format, maxing out all would give you the color white, and it will be your text's color
+
+            const char* text = curNode->title;
+            SDL_Surface* nodeMessage = TTF_RenderText_Solid(Sans, text, White); // as TTF_RenderText_Solid could only be used on SDL_Surface then you have to create the surface first
+
+            SDL_Texture* Message = SDL_CreateTextureFromSurface(rend, nodeMessage); //now you can convert it into a texture
+
+            SDL_Rect Message_rect; //create a rect
+            Message_rect.x = drawX + 2;  //controls the rect's x coordinate 
+            Message_rect.y = drawY + 2; // controls the rect's y coordinte
+
+            TTF_SizeText(Sans, text, &Message_rect.w, &Message_rect.h);
+
+
+            SDL_RenderCopy(rend, Message, NULL, &Message_rect);
+
+            
+            SDL_DestroyTexture(Message);
+            SDL_FreeSurface(nodeMessage);
+
+
+
+
+
+
+
+
+            //draw ports
+            
+            //actual circle
+            int IOSize = 8;
+
+            for (int curInput = 0; curInput < inputcount; curInput++)
+            {
+                
+                int topY = curInput * PortSize + renderable->topMargin + drawY;
+
+                SDL_Surface* Portsurface;
+
+                Portsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/io.png");
+                SDL_Texture* Nodetex = SDL_CreateTextureFromSurface(rend, Portsurface);
+                SDL_FreeSurface(Portsurface);
+
+                //color the port
+                switch (curNode->inputs[curInput]->port.PortType)
+                {
+                case Data::Data_Type::Boolean:
+                    SDL_SetTextureColorMod(Nodetex, 255, 0, 0);
+                    break;
+                case Data::Data_Type::Numeric:
+                case Data::Data_Type::Float:
+                    SDL_SetTextureColorMod(Nodetex, 255, 255, 0);
+                    break;
+                case Data::Data_Type::Integer:
+                    SDL_SetTextureColorMod(Nodetex, 0, 255, 0);
+                    break;
+                case Data::Data_Type::String:
+                    SDL_SetTextureColorMod(Nodetex, 255, 0, 255);
+                    break;
+                case Data::Data_Type::Weird:
+                    SDL_SetTextureColorMod(Nodetex, 255, 147, 0);
+                    break;
+                }
+
+                SDL_Rect Portdest;
+                Portdest.w = IOSize;
+                Portdest.h = IOSize;
+                Portdest.x = drawX - 4;
+                Portdest.y = topY;
+
+                curNode->inputs[curInput]->port.renderX = Portdest.x + IOSize / 2;
+                curNode->inputs[curInput]->port.renderY = Portdest.y + IOSize / 2;
+                //SDL_QueryTexture(Nodetex, NULL, NULL, &Portdest.w, &Portdest.h);
+
+                SDL_RenderCopy(rend, Nodetex, NULL, &Portdest);
+                SDL_DestroyTexture(Nodetex);
+            }
+
+            for (int curOutput = 0; curOutput < outputcount; curOutput++)
+            {
+                int topY = curOutput * PortSize + renderable->topMargin + drawY;
+
+                SDL_Surface* Portsurface;
+
+                Portsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/io.png");
+                SDL_Texture* Nodetex = SDL_CreateTextureFromSurface(rend, Portsurface);
+                SDL_FreeSurface(Portsurface);
+
+                //color the port
+                switch (curNode->outputs[curOutput]->port.PortType)
+                {
+                case Data::Data_Type::Boolean:
+                    SDL_SetTextureColorMod(Nodetex, 255, 0, 0);
+                    break;
+                case Data::Data_Type::Numeric:
+                case Data::Data_Type::Float:
+                    SDL_SetTextureColorMod(Nodetex, 255, 255, 0);
+                    break;
+                case Data::Data_Type::Integer:
+                    SDL_SetTextureColorMod(Nodetex, 0, 255, 0);
+                    break;
+                case Data::Data_Type::String:
+                    SDL_SetTextureColorMod(Nodetex, 255, 0, 255);
+                    break;
+                case Data::Data_Type::Weird:
+                    SDL_SetTextureColorMod(Nodetex, 255, 147, 0);
+                    break;
+                }
+
+                SDL_Rect Portdest;
+                Portdest.w = IOSize;
+                Portdest.h = IOSize;
+                Portdest.x = renderable->width + drawX - 4;
+                Portdest.y = topY;
+
+                curNode->outputs[curOutput]->port.renderX = Portdest.x + IOSize / 2;
+                curNode->outputs[curOutput]->port.renderY = Portdest.y + IOSize / 2;
+                //SDL_QueryTexture(Nodetex, NULL, NULL, &Portdest.w, &Portdest.h);
+
+                SDL_RenderCopy(rend, Nodetex, NULL, &Portdest);
+                SDL_DestroyTexture(Nodetex);
+            }
         }
+
+        //Draw Links
+        for (int curLink = 0; curLink < LinkStack.size(); curLink++)
+        {
+            Link* current = LinkStack[curLink];
+
+            int InX = current->LinkInput->port.renderX;
+            int InY = current->LinkInput->port.renderY;
+            int OutX = current->LinkOutput->port.renderX;
+            int OutY = current->LinkOutput->port.renderY;
+
+            SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
+            SDL_RenderDrawLine(rend, InX, InY, OutX, OutY);
+        }
+
 
         //End Draw
         // triggers the double buffers 
@@ -376,7 +546,7 @@ int main(int argc, char* argv[])
         // calculates to 60 fps 
         SDL_Delay(1000 / 60);
     }
-
+    
     // destroy texture 
     SDL_DestroyTexture(tex);
 

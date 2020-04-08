@@ -87,8 +87,11 @@ class DataPort
 {
 public:
 	Data::Data_Type PortType;
+	int renderX, renderY;
 	DataPort(Data::Data_Type inType = Data::Data_Type::None)
 	{
 		PortType = inType;
+		renderX = 0;
+		renderY = 0;
 	}
 };
