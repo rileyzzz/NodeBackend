@@ -90,6 +90,21 @@ Data* NodeMath::Pow(std::vector<Data*> Inputs)
     return new NodeFloat(std::pow(value1, value2));
 }
 
+//Comparison
+Data* NodeComparison::And(std::vector<Data*> Inputs)
+{
+    NodeBoolean* input1 = (NodeBoolean*)Inputs[0];
+    NodeBoolean* input2 = (NodeBoolean*)Inputs[1];
+    return new NodeBoolean(input1->value && input2->value);
+}
+
+Data* NodeComparison::Or(std::vector<Data*> Inputs)
+{
+    NodeBoolean* input1 = (NodeBoolean*)Inputs[0];
+    NodeBoolean* input2 = (NodeBoolean*)Inputs[1];
+    return new NodeBoolean(input1->value || input2->value);
+}
+
 //Casting
 Data* NodeCast::BooltoInt(std::vector<Data*> Inputs)
 {

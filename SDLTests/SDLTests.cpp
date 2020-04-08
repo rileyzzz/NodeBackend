@@ -236,6 +236,45 @@ int main(int argc, char* argv[])
 
 
 
+    //boolean example
+    std::vector<DataPort> boolinPorts{  };
+    std::vector<DataPort> booloutPorts{ DataPort(Data::Data_Type::Boolean) };
+    std::vector<Input*> boolnodeInputs;
+    std::vector<Output*> boolnodeOutputs = CreateOutputs(booloutPorts);
+
+    DataNode* boolExampleNode = CreateNode(Node::Node_Type::Node_Input, boolnodeInputs, boolnodeOutputs, "True Input", 0, 400);
+
+    //set the initial input value! this is important
+    boolExampleNode->InputData = new NodeBoolean(true);
+
+    std::vector<DataPort> bool2inPorts{  };
+    std::vector<DataPort> bool2outPorts{ DataPort(Data::Data_Type::Boolean) };
+    std::vector<Input*> bool2nodeInputs;
+    std::vector<Output*> bool2nodeOutputs = CreateOutputs(bool2outPorts);
+
+    DataNode* bool2ExampleNode = CreateNode(Node::Node_Type::Node_Input, bool2nodeInputs, bool2nodeOutputs, "False Input", 0, 450);
+
+    //set the initial input value! this is important
+    bool2ExampleNode->InputData = new NodeBoolean(false);
+
+
+    std::vector<DataPort> AndinPorts{ DataPort(Data::Data_Type::Boolean), DataPort(Data::Data_Type::Boolean) };
+    std::vector<DataPort> AndoutPorts{ DataPort(Data::Data_Type::Boolean) };
+    std::vector<Input*> AndnodeInputs = CreateInputs(AndinPorts);
+    std::vector<Output*> AndnodeOutputs = CreateOutputs(AndoutPorts);
+
+    DataNode* AndExampleNode = CreateNode(Node::Node_Type::Node_Calculation, AndnodeInputs, AndnodeOutputs, "And", 150, 425, NodeComparison::And);
+
+    std::vector<DataPort> CompinPorts{ DataPort(Data::Data_Type::Boolean) };
+    std::vector<DataPort> CompoutPorts{ };
+    std::vector<Input*> CompnodeInputs = CreateInputs(CompinPorts);
+    std::vector<Output*> CompnodeOutputs;
+
+    DataNode* CompExampleNode = CreateNode(Node::Node_Type::Node_Output, CompnodeInputs, CompnodeOutputs, "Output", 300, 425);
+
+
+
+
 
 
     //Node texture
@@ -303,6 +342,17 @@ int main(int argc, char* argv[])
                     std::cout << "Output result is: ";
                     std::cout << calcvalue->value;
                     std::cout << "\n";
+
+                    Data* boolcalc = CompExampleNode->CalculateInputs();
+                    NodeBoolean* boolresult = (NodeBoolean*)boolcalc;
+                    if (boolresult->value == true)
+                    {
+                        std::cout << "Boolean returned true.\n";
+                    }
+                    else
+                    {
+                        std::cout << "Boolean returned false.\n";
+                    }
                     break;
                 } 
                 case SDL_SCANCODE_SPACE:

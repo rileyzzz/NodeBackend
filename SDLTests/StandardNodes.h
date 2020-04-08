@@ -28,6 +28,14 @@ public:
 	static Data* Pow(std::vector<Data*> Inputs);
 };
 
+class NodeComparison
+{
+public:
+	static Data* And(std::vector<Data*> Inputs);
+
+	static Data* Or(std::vector<Data*> Inputs);
+};
+
 //Casting
 class NodeCast
 {
