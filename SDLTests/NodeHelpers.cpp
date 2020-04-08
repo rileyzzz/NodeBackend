@@ -42,7 +42,14 @@ Data* CalculateLinkChain(Output* srcLink)
                 ParentNode->CalculatedInputs.clear();
                 for (int dependency = 0; dependency < ParentNode->inputs.size(); dependency++)
                 {
-                    ParentNode->CalculatedInputs.push_back(CalculateLinkChain(ParentNode->inputs[dependency]->link));
+                    if (ParentNode->inputs[dependency]->link)
+                    {
+                        ParentNode->CalculatedInputs.push_back(CalculateLinkChain(ParentNode->inputs[dependency]->link));
+                    }
+                    else
+                    {
+                        ParentNode->CalculatedInputs.push_back(GetNodeDefault(ParentNode->inputs[dependency]->port.PortType));
+                    }
                 }
                 returnval = ParentNode->Calculate(ParentNode->CalculatedInputs);
             }
@@ -66,4 +73,28 @@ void Unlink(Link* inLink)
     inLink->LinkInput = nullptr;
     inLink->LinkOutput = nullptr;
     inLink = nullptr;
+}
+
+Data* GetNodeDefault(Data::Data_Type intype)
+{
+    switch (intype)
+    {
+    case Data::Data_Type::Boolean:
+        return new NodeBoolean(false);
+        break;
+    case Data::Data_Type::Integer:
+        return new NodeInteger(0);
+        break;
+    case Data::Data_Type::Float:
+        return new NodeFloat(0.0);
+        break;
+    case Data::Data_Type::String:
+        return new NodeString("");
+        break;
+    case Data::Data_Type::Weird:
+        return new NodeNone();
+        break;
+    default:
+        return new NodeNone();
+    }
 }

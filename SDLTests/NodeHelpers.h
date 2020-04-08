@@ -9,3 +9,5 @@ std::vector<Output*> CreateOutputs(std::vector<DataPort> itemarray);
 Data* CalculateLinkChain(Output* srcLink);
 
 void Unlink(Link* inLink);
+
+Data* GetNodeDefault(Data::Data_Type intype);

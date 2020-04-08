@@ -10,7 +10,14 @@ Data* Node::CalculateInputs()
         Input* nodeInput = inputs[nodeInputID];
 
         //Recursion through entire link tree.
-        CalculatedInputs.push_back(CalculateLinkChain(nodeInput->link));
+        if (nodeInput->link)
+        {
+            CalculatedInputs.push_back(CalculateLinkChain(nodeInput->link));
+        }
+        else
+        {
+            CalculatedInputs.push_back(GetNodeDefault(nodeInput->port.PortType));
+        }
     }
     //returns the first calculated input, for ease of use with basic output nodes.
     return CalculatedInputs[0];
