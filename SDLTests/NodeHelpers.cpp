@@ -64,6 +64,7 @@ Data* CalculateLinkChain(Output* srcLink)
     }
 }
 
+
 void Unlink(Link* inLink)
 {
     inLink->LinkInput->link = nullptr;
@@ -83,8 +84,9 @@ Data* GetNodeDefault(Data::Data_Type intype)
         return new NodeBoolean(false);
         break;
     case Data::Data_Type::Integer:
-        return new NodeInteger(0);
+        return new NodeInteger(0.0);
         break;
+    case Data::Data_Type::Numeric:
     case Data::Data_Type::Float:
         return new NodeFloat(0.0);
         break;
