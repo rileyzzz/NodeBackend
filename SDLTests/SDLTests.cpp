@@ -18,11 +18,13 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 int IDcount = 0;
 std::vector<Node*> NodeStack;
 std::vector<Link*> LinkStack;
-int gridoffsetX = 0;
-int gridoffsetY = 0;
+int gridoffsetX = 300;
+int gridoffsetY = 300;
 int MMoffsetX = 0;
 int MMoffsetY = 0;
 int gridParallaxAmount = 4;
+
+int globalScaleFactor = 2;
 
 DataNode* CreateNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
 {
@@ -49,8 +51,8 @@ ActionNode* CreateActionNode(Node::Node_Type type, std::vector<Input*> inputs, s
 void GetScreenCoordinates(int x, int y, int* sendX, int* sendY)
 {
     //int returnarr[2];
-    *sendX = (gridoffsetX + MMoffsetX) + x;
-    *sendY = (gridoffsetY + MMoffsetY) + y;
+    *sendX = (gridoffsetX + MMoffsetX) + x * globalScaleFactor;
+    *sendY = (gridoffsetY + MMoffsetY) + y * globalScaleFactor;
 }
 
 int main(int argc, char* argv[])
@@ -233,6 +235,7 @@ int main(int argc, char* argv[])
     SDL_QueryTexture(tex, NULL, NULL, &Nodedest.w, &Nodedest.h);
 
     
+    int PortHitboxSize = 4 * globalScaleFactor;
 
     // animation loop 
     while (!close) {
@@ -287,9 +290,9 @@ int main(int argc, char* argv[])
                         {
                             DataPort* Curport = &checkNode->inputs[Portcount]->port;
 
-                            if (mouseX > Curport->renderX - 4 && mouseX < Curport->renderX + 4)
+                            if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize)
                             {
-                                if (mouseY > Curport->renderY - 4 && mouseY < Curport->renderY + 4)
+                                if (mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
                                 {
                                     currentDragPort = Curport;
                                     currentDragPortParent = checkNode->inputs[Portcount];
@@ -302,9 +305,9 @@ int main(int argc, char* argv[])
                         {
                             DataPort* Curport = &checkNode->outputs[Portcount]->port;
 
-                            if (mouseX > Curport->renderX - 4 && mouseX < Curport->renderX + 4)
+                            if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize)
                             {
-                                if (mouseY > Curport->renderY - 4 && mouseY < Curport->renderY + 4)
+                                if (mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
                                 {
                                     currentDragNewPort = Curport;
                                     currentDragNewPortParent = checkNode->outputs[Portcount];
@@ -321,7 +324,7 @@ int main(int argc, char* argv[])
                         Node* checkNode = NodeStack[Nodecount];
                         NodeDrawable* renderable = checkNode->renderable;
                         
-                        if (mouseX > renderable->renderX && mouseX < renderable->renderX + renderable->width)
+                        if (mouseX > renderable->renderX && mouseX < renderable->renderX + renderable->width * globalScaleFactor)
                         {
                             if (mouseY > renderable->renderY && mouseY < renderable->renderY + renderable->currentHeight)
                             {
@@ -369,9 +372,9 @@ int main(int argc, char* argv[])
                             {
                                 DataPort* Curport = &checkNode->inputs[Portcount]->port;
 
-                                if (mouseX > Curport->renderX - 4 && mouseX < Curport->renderX + 4)
+                                if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize)
                                 {
-                                    if (mouseY > Curport->renderY - 4 && mouseY < Curport->renderY + 4)
+                                    if (mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
                                     {
                                         if (currentDragPort != Curport && currentDragPortParent->type == Linkable::Link_Type::Input && currentDragPort->SubType == checkNode->inputs[Portcount]->port.SubType)
                                         {
@@ -420,9 +423,9 @@ int main(int argc, char* argv[])
                             {
                                 DataPort* Curport = &checkNode->inputs[Portcount]->port;
 
-                                if (mouseX > Curport->renderX - 4 && mouseX < Curport->renderX + 4)
+                                if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize)
                                 {
-                                    if (mouseY > Curport->renderY - 4 && mouseY < Curport->renderY + 4)
+                                    if (mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
                                     {
                                         if (currentDragNewPort != Curport && currentDragNewPortParent->type == Linkable::Link_Type::Output && currentDragNewPort->SubType == checkNode->inputs[Portcount]->port.SubType)
                                         {
@@ -498,8 +501,8 @@ int main(int argc, char* argv[])
             int deltaMouseX = mouseX - renderable->mouseStartX;
             int deltaMouseY = mouseY - renderable->mouseStartY;
 
-            renderable->x = renderable->StartX + deltaMouseX;
-            renderable->y = renderable->StartY + deltaMouseY;
+            renderable->x = renderable->StartX + deltaMouseX / globalScaleFactor;
+            renderable->y = renderable->StartY + deltaMouseY / globalScaleFactor;
         }
 
         dest.w = 48 + 32 * zoomLevel;
@@ -564,13 +567,13 @@ int main(int argc, char* argv[])
             int outputcount = curNode->outputs.size();
 
             //With margin
-            int PortSize = 24;
+            int PortSize = 24 * globalScaleFactor;
             int midheight = std::fmax(inputcount, outputcount) * PortSize;
 
             SDL_Rect NodeElement;
-            NodeElement.w = renderable->width;
-            NodeElement.h = renderable->topMargin + midheight + renderable->bottomMargin;
-            renderable->currentHeight = renderable->topMargin + midheight + renderable->bottomMargin;
+            NodeElement.w = renderable->width * globalScaleFactor;
+            NodeElement.h = (renderable->topMargin + midheight + renderable->bottomMargin) * globalScaleFactor;
+            renderable->currentHeight = (renderable->topMargin + midheight + renderable->bottomMargin) * globalScaleFactor;
             NodeElement.x = drawX;
             NodeElement.y = drawY;
             renderable->renderX = drawX;
@@ -582,7 +585,7 @@ int main(int argc, char* argv[])
             //Render text
             TTF_Init();
 
-            TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", 12); //this opens a font style and sets a size
+            TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", 12 * globalScaleFactor); //this opens a font style and sets a size
 
 
             SDL_Color White = { 255, 255, 255 };  // this is the color in rgb format, maxing out all would give you the color white, and it will be your text's color
@@ -593,8 +596,8 @@ int main(int argc, char* argv[])
             SDL_Texture* Message = SDL_CreateTextureFromSurface(rend, nodeMessage); //now you can convert it into a texture
 
             SDL_Rect Message_rect; //create a rect
-            Message_rect.x = drawX + 2;  //controls the rect's x coordinate 
-            Message_rect.y = drawY + 2; // controls the rect's y coordinte
+            Message_rect.x = drawX + 2 * globalScaleFactor;  //controls the rect's x coordinate 
+            Message_rect.y = drawY + 2 * globalScaleFactor; // controls the rect's y coordinte
 
             TTF_SizeText(Sans, text, &Message_rect.w, &Message_rect.h);
 
@@ -609,12 +612,12 @@ int main(int argc, char* argv[])
             //draw ports
             
             //actual circle
-            int IOSize = 8;
+            int IOSize = 8 * globalScaleFactor;
 
             for (int curInput = 0; curInput < inputcount; curInput++)
             {
                 
-                int topY = curInput * PortSize + renderable->topMargin + drawY;
+                int topY = curInput * PortSize + renderable->topMargin * globalScaleFactor + drawY;
 
                 SDL_Surface* Portsurface;
 
@@ -646,7 +649,7 @@ int main(int argc, char* argv[])
                 SDL_Rect Portdest;
                 Portdest.w = IOSize;
                 Portdest.h = IOSize;
-                Portdest.x = drawX - 4;
+                Portdest.x = drawX - 4 * globalScaleFactor;
                 Portdest.y = topY;
 
                 if (&curNode->inputs[curInput]->port != currentDragPort)
@@ -664,7 +667,7 @@ int main(int argc, char* argv[])
 
             for (int curOutput = 0; curOutput < outputcount; curOutput++)
             {
-                int topY = curOutput * PortSize + renderable->topMargin + drawY;
+                int topY = curOutput * PortSize + renderable->topMargin * globalScaleFactor + drawY;
 
                 SDL_Surface* Portsurface;
 
@@ -696,7 +699,7 @@ int main(int argc, char* argv[])
                 SDL_Rect Portdest;
                 Portdest.w = IOSize;
                 Portdest.h = IOSize;
-                Portdest.x = renderable->width + drawX - 4;
+                Portdest.x = renderable->width * globalScaleFactor + drawX - 4 * globalScaleFactor;
                 Portdest.y = topY;
 
                 curNode->outputs[curOutput]->port.renderX = Portdest.x + IOSize / 2;
