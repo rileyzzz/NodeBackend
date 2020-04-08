@@ -224,6 +224,20 @@ int main(int argc, char* argv[])
 
 
 
+    std::vector<DataPort> strinPorts{  };
+    std::vector<DataPort> stroutPorts{ DataPort(Data::Data_Type::String) };
+    std::vector<Input*> strnodeInputs;
+    std::vector<Output*> strnodeOutputs = CreateOutputs(stroutPorts);
+
+    DataNode* strExampleNode = CreateNode(Node::Node_Type::Node_Input, strnodeInputs, strnodeOutputs, "String Input", 0, 300);
+
+    //set the initial input value! this is important
+    strExampleNode->InputData = new NodeString("This is a test string!");
+
+
+
+
+
     //Node texture
     SDL_Surface* Nodesurface;
 
@@ -278,8 +292,22 @@ int main(int argc, char* argv[])
                 case SDL_SCANCODE_RIGHT:
                     gridoffsetX += speed / 30;
                     break;
+                case SDL_SCANCODE_RETURN:
+                {
+                    //Run our blueprint
+                    EventExampleNode->Run();
+
+                    Data* returnval = ExampleNode3->CalculateInputs();
+                    NodeFloat* calcvalue = (NodeFloat*)returnval;
+
+                    std::cout << "Output result is: ";
+                    std::cout << calcvalue->value;
+                    std::cout << "\n";
+                    break;
+                } 
                 case SDL_SCANCODE_SPACE:
                     showNodeList = !showNodeList;
+                    break;
                 }
             case SDL_MOUSEBUTTONDOWN:
                 switch (event.button.button) {
@@ -721,17 +749,6 @@ int main(int argc, char* argv[])
         //Draw Node List BG
         if (showNodeList)
         {
-            //temp for profiling
-            EventExampleNode->Run();
-
-            Data* returnval = ExampleNode3->CalculateInputs();
-            NodeFloat* calcvalue = (NodeFloat*)returnval;
-
-            std::cout << "Output result is: ";
-            std::cout << calcvalue->value;
-            std::cout << "\n";
-
-
             SDL_Rect ListElement;
             ListElement.w = scrw;
             ListElement.h = scrh / 5;
