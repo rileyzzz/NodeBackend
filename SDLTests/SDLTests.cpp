@@ -24,7 +24,7 @@ int MMoffsetX = 0;
 int MMoffsetY = 0;
 int gridParallaxAmount = 4;
 
-int globalScaleFactor = 2;
+int globalScaleFactor = 1;
 
 DataNode* CreateNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
 {
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
 
     int zoomLevel = 1;
     int zoomMax = 5;
-    int zoomMin = 0;
+    int zoomMin = 1;
 
     
 
@@ -232,10 +232,19 @@ int main(int argc, char* argv[])
     SDL_FreeSurface(Nodesurface);
 
     SDL_Rect Nodedest;
+    SDL_Rect NodeElement;
+    SDL_Rect Portdest;
+    SDL_Surface* Portsurface;
+
+    Portsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/io.png");
+    SDL_Texture* Porttex = SDL_CreateTextureFromSurface(rend, Portsurface);
+    SDL_FreeSurface(Portsurface);
     SDL_QueryTexture(tex, NULL, NULL, &Nodedest.w, &Nodedest.h);
 
-    
-    int PortHitboxSize = 4 * globalScaleFactor;
+    TTF_Init();
+
+
+    int PortHitboxSize = 8 * (globalScaleFactor * 1.5);
 
     // animation loop 
     while (!close) {
@@ -475,10 +484,12 @@ int main(int argc, char* argv[])
                 if (event.wheel.y > 0) // scroll up
                 {
                     if (zoomLevel < zoomMax) zoomLevel++;
+                    if (globalScaleFactor < zoomMax) globalScaleFactor++;
                 }
                 else if (event.wheel.y < 0) // scroll down
                 {
                     if (zoomLevel > zoomMin) zoomLevel--;
+                    if (globalScaleFactor > zoomMin) globalScaleFactor--;
                 }
                 break;
             }
@@ -570,10 +581,10 @@ int main(int argc, char* argv[])
             int PortSize = 24 * globalScaleFactor;
             int midheight = std::fmax(inputcount, outputcount) * PortSize;
 
-            SDL_Rect NodeElement;
+            
             NodeElement.w = renderable->width * globalScaleFactor;
-            NodeElement.h = (renderable->topMargin + midheight + renderable->bottomMargin) * globalScaleFactor;
-            renderable->currentHeight = (renderable->topMargin + midheight + renderable->bottomMargin) * globalScaleFactor;
+            NodeElement.h = renderable->topMargin * globalScaleFactor + midheight + renderable->bottomMargin * globalScaleFactor;
+            renderable->currentHeight = renderable->topMargin * globalScaleFactor + midheight + renderable->bottomMargin * globalScaleFactor;
             NodeElement.x = drawX;
             NodeElement.y = drawY;
             renderable->renderX = drawX;
@@ -583,7 +594,7 @@ int main(int argc, char* argv[])
             SDL_RenderFillRect(rend, &NodeElement);
 
             //Render text
-            TTF_Init();
+            
 
             TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", 12 * globalScaleFactor); //this opens a font style and sets a size
 
@@ -607,7 +618,7 @@ int main(int argc, char* argv[])
             
             SDL_DestroyTexture(Message);
             SDL_FreeSurface(nodeMessage);
-
+            TTF_CloseFont(Sans);
 
             //draw ports
             
@@ -619,34 +630,30 @@ int main(int argc, char* argv[])
                 
                 int topY = curInput * PortSize + renderable->topMargin * globalScaleFactor + drawY;
 
-                SDL_Surface* Portsurface;
-
-                Portsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/io.png");
-                SDL_Texture* Nodetex = SDL_CreateTextureFromSurface(rend, Portsurface);
-                SDL_FreeSurface(Portsurface);
+                
 
                 //color the port
                 switch (curNode->inputs[curInput]->port.PortType)
                 {
                 case Data::Data_Type::Boolean:
-                    SDL_SetTextureColorMod(Nodetex, 255, 0, 0);
+                    SDL_SetTextureColorMod(Porttex, 255, 0, 0);
                     break;
                 case Data::Data_Type::Numeric:
                 case Data::Data_Type::Float:
-                    SDL_SetTextureColorMod(Nodetex, 255, 255, 0);
+                    SDL_SetTextureColorMod(Porttex, 255, 255, 0);
                     break;
                 case Data::Data_Type::Integer:
-                    SDL_SetTextureColorMod(Nodetex, 0, 255, 0);
+                    SDL_SetTextureColorMod(Porttex, 0, 255, 0);
                     break;
                 case Data::Data_Type::String:
-                    SDL_SetTextureColorMod(Nodetex, 255, 0, 255);
+                    SDL_SetTextureColorMod(Porttex, 255, 0, 255);
                     break;
                 case Data::Data_Type::Weird:
-                    SDL_SetTextureColorMod(Nodetex, 255, 147, 0);
+                    SDL_SetTextureColorMod(Porttex, 255, 147, 0);
                     break;
                 }
 
-                SDL_Rect Portdest;
+                
                 Portdest.w = IOSize;
                 Portdest.h = IOSize;
                 Portdest.x = drawX - 4 * globalScaleFactor;
@@ -661,42 +668,38 @@ int main(int argc, char* argv[])
 
                 //SDL_QueryTexture(Nodetex, NULL, NULL, &Portdest.w, &Portdest.h);
 
-                SDL_RenderCopy(rend, Nodetex, NULL, &Portdest);
-                SDL_DestroyTexture(Nodetex);
+                SDL_RenderCopy(rend, Porttex, NULL, &Portdest);
+                
             }
 
             for (int curOutput = 0; curOutput < outputcount; curOutput++)
             {
                 int topY = curOutput * PortSize + renderable->topMargin * globalScaleFactor + drawY;
 
-                SDL_Surface* Portsurface;
-
-                Portsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/io.png");
-                SDL_Texture* Nodetex = SDL_CreateTextureFromSurface(rend, Portsurface);
-                SDL_FreeSurface(Portsurface);
+                
 
                 //color the port
                 switch (curNode->outputs[curOutput]->port.PortType)
                 {
                 case Data::Data_Type::Boolean:
-                    SDL_SetTextureColorMod(Nodetex, 255, 0, 0);
+                    SDL_SetTextureColorMod(Porttex, 255, 0, 0);
                     break;
                 case Data::Data_Type::Numeric:
                 case Data::Data_Type::Float:
-                    SDL_SetTextureColorMod(Nodetex, 255, 255, 0);
+                    SDL_SetTextureColorMod(Porttex, 255, 255, 0);
                     break;
                 case Data::Data_Type::Integer:
-                    SDL_SetTextureColorMod(Nodetex, 0, 255, 0);
+                    SDL_SetTextureColorMod(Porttex, 0, 255, 0);
                     break;
                 case Data::Data_Type::String:
-                    SDL_SetTextureColorMod(Nodetex, 255, 0, 255);
+                    SDL_SetTextureColorMod(Porttex, 255, 0, 255);
                     break;
                 case Data::Data_Type::Weird:
-                    SDL_SetTextureColorMod(Nodetex, 255, 147, 0);
+                    SDL_SetTextureColorMod(Porttex, 255, 147, 0);
                     break;
                 }
 
-                SDL_Rect Portdest;
+                
                 Portdest.w = IOSize;
                 Portdest.h = IOSize;
                 Portdest.x = renderable->width * globalScaleFactor + drawX - 4 * globalScaleFactor;
@@ -706,8 +709,8 @@ int main(int argc, char* argv[])
                 curNode->outputs[curOutput]->port.renderY = Portdest.y + IOSize / 2;
                 //SDL_QueryTexture(Nodetex, NULL, NULL, &Portdest.w, &Portdest.h);
 
-                SDL_RenderCopy(rend, Nodetex, NULL, &Portdest);
-                SDL_DestroyTexture(Nodetex);
+                SDL_RenderCopy(rend, Porttex, NULL, &Portdest);
+                
             }
         }
 
@@ -752,7 +755,7 @@ int main(int argc, char* argv[])
     SDL_DestroyTexture(tex);
 
     SDL_DestroyTexture(Nodetex);
-
+    SDL_DestroyTexture(Porttex);
     // destroy renderer 
     SDL_DestroyRenderer(rend);
 
