@@ -54,6 +54,7 @@ class Node
 		std::vector<Input*> inputs;
 		std::vector<Output*> outputs;
 		
+
 		const char* title;
 
 		NodeDrawable* renderable;

@@ -120,7 +120,8 @@ int main(int argc, char* argv[])
     
 
     bool showNodeList = false;
-    
+    bool draggingNode = false;
+    Node* currentDrag = nullptr;
 
     //Create example node
     std::vector<DataPort> inPorts{  };
@@ -128,7 +129,7 @@ int main(int argc, char* argv[])
     std::vector<Input*> nodeInputs;
     std::vector<Output*> nodeOutputs = CreateOutputs(outPorts);
 
-    DataNode* ExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Integer Input", 0, -150);
+    DataNode* ExampleNode = CreateNode(Node::Node_Type::Node_Input, nodeInputs, nodeOutputs, "Integer Input", 0, -20);
 
     //set the initial input value! this is important
     ExampleNode->InputData = new NodeInteger(5);
@@ -139,7 +140,7 @@ int main(int argc, char* argv[])
     std::vector<Input*> tempnodeInputs;
     std::vector<Output*> tempnodeOutputs = CreateOutputs(tempoutPorts);
 
-    DataNode* tempExampleNode = CreateNode(Node::Node_Type::Node_Input, tempnodeInputs, tempnodeOutputs, "Float Input", 0, 0);
+    DataNode* tempExampleNode = CreateNode(Node::Node_Type::Node_Input, tempnodeInputs, tempnodeOutputs, "Float Input", 0, 50);
 
     //set the initial input value! this is important
     tempExampleNode->InputData = new NodeFloat(2.5);
@@ -263,6 +264,33 @@ int main(int argc, char* argv[])
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT:
                     //std::cout << "Left mouse pressed\n";
+
+                    //drag hit test
+                    int mouseX, mouseY;
+                    SDL_GetMouseState(&mouseX, &mouseY);
+
+                    for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
+                    {
+                        Node* checkNode = NodeStack[Nodecount];
+                        NodeDrawable* renderable = checkNode->renderable;
+                        
+                        if (mouseX > renderable->renderX && mouseX < renderable->renderX + renderable->width)
+                        {
+                            if (mouseY > renderable->renderY && mouseY < renderable->renderY + renderable->currentHeight)
+                            {
+                                //std::cout << "clicked a node!";
+                                renderable->mouseStartX = mouseX;
+                                renderable->mouseStartY = mouseY;
+                                renderable->StartX = renderable->x;
+                                renderable->StartY = renderable->y;
+
+                                currentDrag = checkNode;
+                                draggingNode = true;
+                                
+                            }
+                        }
+                    }
+
                     break;
                 case SDL_BUTTON_RIGHT:
                     //std::cout << "Right mouse pressed\n";
@@ -280,6 +308,8 @@ int main(int argc, char* argv[])
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT:
                     //std::cout << "Left mouse released\n";
+                    draggingNode = false;
+                    currentDrag = nullptr;
                     break;
                 case SDL_BUTTON_RIGHT:
                     //std::cout << "Right mouse released\n";
@@ -306,6 +336,7 @@ int main(int argc, char* argv[])
                 break;
             }
         }
+
         if (MiddleMouse)
         {
             int mouseX, mouseY;
@@ -313,6 +344,18 @@ int main(int argc, char* argv[])
             MMoffsetX = mouseX - startX;
             MMoffsetY = mouseY - startY;
             
+        }
+        if (draggingNode)
+        {
+            NodeDrawable* renderable = currentDrag->renderable;
+
+            int mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
+            int deltaMouseX = mouseX - renderable->mouseStartX;
+            int deltaMouseY = mouseY - renderable->mouseStartY;
+
+            renderable->x = renderable->StartX + deltaMouseX;
+            renderable->y = renderable->StartY + deltaMouseY;
         }
 
         dest.w = 48 + 32 * zoomLevel;
@@ -379,8 +422,11 @@ int main(int argc, char* argv[])
             SDL_Rect NodeElement;
             NodeElement.w = renderable->width;
             NodeElement.h = renderable->topMargin + midheight + renderable->bottomMargin;
+            renderable->currentHeight = renderable->topMargin + midheight + renderable->bottomMargin;
             NodeElement.x = drawX;
             NodeElement.y = drawY;
+            renderable->renderX = drawX;
+            renderable->renderY = drawY;
 
             SDL_SetRenderDrawColor(rend, 40, 40, 50, 255);
             SDL_RenderFillRect(rend, &NodeElement);
