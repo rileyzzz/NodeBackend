@@ -13,6 +13,7 @@ public:
 		None
 	};
 	Data_Type type;
+	Data_Type subtype;
 };
 
 class NodeNumeric : public Data
@@ -29,6 +30,7 @@ public:
 	{
 		value = input;
 		type = Data_Type::Boolean;
+		subtype = Data_Type::Boolean;
 	}
 };
 
@@ -39,6 +41,7 @@ public:
 	{
 		value = input;
 		type = Data_Type::Integer;
+		subtype = Data_Type::Numeric;
 	}
 };
 
@@ -49,6 +52,7 @@ public:
 	{
 		value = input;
 		type = Data_Type::Float;
+		subtype = Data_Type::Numeric;
 	}
 };
 
@@ -60,6 +64,7 @@ public:
 	{
 		value = input;
 		type = Data_Type::String;
+		subtype = Data_Type::String;
 	}
 };
 
@@ -71,6 +76,7 @@ public:
 	{
 		value = input;
 		type = Data_Type::Weird;
+		subtype = Data_Type::Weird;
 	}
 };
 
@@ -80,6 +86,7 @@ public:
 	NodeNone()
 	{
 		type = Data_Type::None;
+		subtype = Data_Type::None;
 	}
 };
 
@@ -87,10 +94,19 @@ class DataPort
 {
 public:
 	Data::Data_Type PortType;
+	Data::Data_Type SubType;
 	int renderX, renderY;
 	DataPort(Data::Data_Type inType = Data::Data_Type::None)
 	{
 		PortType = inType;
+		if (inType == Data::Data_Type::Integer || inType == Data::Data_Type::Float)
+		{
+			SubType = Data::Data_Type::Numeric;
+		}
+		else
+		{
+			SubType = inType;
+		}
 		renderX = 0;
 		renderY = 0;
 	}

@@ -373,7 +373,7 @@ int main(int argc, char* argv[])
                                 {
                                     if (mouseY > Curport->renderY - 4 && mouseY < Curport->renderY + 4)
                                     {
-                                        if (currentDragPort != Curport && currentDragPortParent->type == Linkable::Link_Type::Input)
+                                        if (currentDragPort != Curport && currentDragPortParent->type == Linkable::Link_Type::Input && currentDragPort->SubType == checkNode->inputs[Portcount]->port.SubType)
                                         {
                                             //std::cout << "Dragged to different output!";
 
@@ -424,7 +424,7 @@ int main(int argc, char* argv[])
                                 {
                                     if (mouseY > Curport->renderY - 4 && mouseY < Curport->renderY + 4)
                                     {
-                                        if (currentDragNewPort != Curport && currentDragNewPortParent->type == Linkable::Link_Type::Output)
+                                        if (currentDragNewPort != Curport && currentDragNewPortParent->type == Linkable::Link_Type::Output && currentDragNewPort->SubType == checkNode->inputs[Portcount]->port.SubType)
                                         {
                                             //std::cout << "Dragged to different output!";
                                             if (checkNode->inputs[Portcount]->currentLink)
