@@ -3,6 +3,7 @@
 
 Data* Node::CalculateInputs()
 {
+    CalculatedInputs.clear();
     //Loop through every input required for our output node.
     for (int nodeInputID = 0; nodeInputID < inputs.size(); nodeInputID++)
     {

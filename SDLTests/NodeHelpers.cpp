@@ -39,6 +39,7 @@ Data* CalculateLinkChain(Output* srcLink)
         case Node::Node_Type::Node_Calculation:
             if (ParentNode->inputs.size())
             {
+                ParentNode->CalculatedInputs.clear();
                 for (int dependency = 0; dependency < ParentNode->inputs.size(); dependency++)
                 {
                     ParentNode->CalculatedInputs.push_back(CalculateLinkChain(ParentNode->inputs[dependency]->link));

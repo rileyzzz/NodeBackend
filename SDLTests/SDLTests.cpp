@@ -176,6 +176,7 @@ int main(int argc, char* argv[])
     LinkStack.push_back(new Link(ExampleNode2, 0, ExampleNode, 0));
     LinkStack.push_back(new Link(ExampleNode2, 1, tempExampleNode, 0));
 
+
     Data* outputresult = ExampleNode3->CalculateInputs();
     NodeFloat* calcvalue = (NodeFloat*)outputresult;
 
@@ -426,6 +427,11 @@ int main(int argc, char* argv[])
                                         if (currentDragNewPort != Curport && currentDragNewPortParent->type == Linkable::Link_Type::Output)
                                         {
                                             //std::cout << "Dragged to different output!";
+                                            if (checkNode->inputs[Portcount]->currentLink)
+                                            {
+                                                LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), checkNode->inputs[Portcount]->currentLink), LinkStack.end());
+                                                Unlink(checkNode->inputs[Portcount]->currentLink);
+                                            }
                                             LinkStack.push_back(new Link((Output*)currentDragNewPortParent, checkNode->inputs[Portcount]));
                                         }
                                     }
@@ -707,6 +713,15 @@ int main(int argc, char* argv[])
         {
             //temp for profiling
             EventExampleNode->Run();
+
+            Data* returnval = ExampleNode3->CalculateInputs();
+            NodeFloat* calcvalue = (NodeFloat*)returnval;
+
+            std::cout << "Output result is: ";
+            std::cout << calcvalue->value;
+            std::cout << "\n";
+
+
             SDL_Rect ListElement;
             ListElement.w = scrw;
             ListElement.h = scrh / 5;
