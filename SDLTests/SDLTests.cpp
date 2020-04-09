@@ -423,7 +423,8 @@ int main(int argc, char* argv[])
                                     //get node grid position
                                     int NewNodeX, NewNodeY;
                                     GetGridCoordinates(mouseX, mouseY, &NewNodeX, &NewNodeY);
-
+                                    NewNodeX -= 40;
+                                    NewNodeY -= 40;
                                     //create the node
                                     std::vector<Input*> NewInputs = CreateInputs(NodeConstructor->inPorts);
                                     std::vector<Output*> NewOutputs = CreateOutputs(NodeConstructor->outPorts);
@@ -491,6 +492,7 @@ int main(int argc, char* argv[])
                     if (draggingPort) break;
                     if (draggingNewPort) break;
                     //node test
+                    bool HitNode = false;
                     for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
                     {
                         Node* checkNode = NodeStack[Nodecount];
@@ -499,6 +501,7 @@ int main(int argc, char* argv[])
                         if (mouseX > renderable->renderX&& mouseX < renderable->renderX + renderable->width * globalScaleFactor && mouseY > renderable->renderY&& mouseY < renderable->renderY + renderable->currentHeight)
                         {
                             //std::cout << "clicked a node!";
+                            HitNode = true;
                             renderable->mouseStartX = mouseX;
                             renderable->mouseStartY = mouseY;
                             renderable->StartX = renderable->x;
@@ -539,6 +542,13 @@ int main(int argc, char* argv[])
                             
                             
                             
+                        }
+                    }
+                    if (!HitNode)
+                    {
+                        currentDrag.clear();
+                        for (const auto& unselectNode : NodeStack) {
+                            unselectNode->Selected = false;
                         }
                     }
 
@@ -839,7 +849,7 @@ int main(int argc, char* argv[])
 
             if (curNode->Selected)
             {
-                int BorderThickness = globalScaleFactor;
+                int BorderThickness = 1;
                 SDL_Rect SelectionBG;
                 SelectionBG.x = NodeElement.x - BorderThickness;
                 SelectionBG.y = NodeElement.y - BorderThickness;
