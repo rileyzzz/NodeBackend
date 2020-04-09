@@ -20,6 +20,7 @@ Data* Node::CalculateInputs()
         }
     }
     //returns the first calculated input, for ease of use with basic output nodes.
+    //this does however support multiple inputs, simply access the CalculatedInputs vector.
     return CalculatedInputs[0];
 }
 
@@ -34,7 +35,7 @@ void ActionNode::Run()
         }
         RunCalled(CalculatedInputs);
     }
-    //std::cout << "Node " << title << " has been called.\n";
+    //Our node has been called.
     if (Next)
     {
         //Continue the chain.

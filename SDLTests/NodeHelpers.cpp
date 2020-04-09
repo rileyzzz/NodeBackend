@@ -73,7 +73,8 @@ void Unlink(Link* inLink)
     inLink->LinkOutput->currentLink = nullptr;
     inLink->LinkInput = nullptr;
     inLink->LinkOutput = nullptr;
-    inLink = nullptr;
+    //inLink = nullptr;
+    delete inLink;
 }
 
 Data* GetNodeDefault(Data::Data_Type intype)
