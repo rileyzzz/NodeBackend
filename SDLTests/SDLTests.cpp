@@ -46,9 +46,9 @@ DataNode* CreateInputNode(Node::Node_Type type, std::vector<Input*> inputs, std:
     NodeStack.push_back(NewNode);
     return NewNode;
 }
-static void DestroyNode(int id)
+static void DestroyNode(Node* node)
 {
-    NodeStack.erase(NodeStack.begin() + id);
+    NodeStack.erase(std::remove(NodeStack.begin(), NodeStack.end(), node), NodeStack.end());
 }
 
 ActionNode* CreateActionNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, bool (*f)(std::vector<Data*>) = nullptr)
@@ -365,6 +365,28 @@ int main(int argc, char* argv[])
                     currentDrag.clear();
                     for (const auto& unselectNode : NodeStack) {
                         unselectNode->Selected = false;
+                    }
+                    break;
+                case SDL_SCANCODE_DELETE:
+                    for (const auto& deleteNode : NodeStack) {
+                        if (deleteNode->Selected && deleteNode->type != Node::Node_Type::Node_Output)
+                        {
+                            for (const auto& deleteInput : deleteNode->inputs) {
+                                if (deleteInput->currentLink)
+                                {
+                                    LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), deleteInput->currentLink), LinkStack.end());
+                                    Unlink(deleteInput->currentLink);
+                                }
+                            }
+                            for (const auto& deleteOutput : deleteNode->outputs) {
+                                if (deleteOutput->currentLink)
+                                {
+                                    LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), deleteOutput->currentLink), LinkStack.end());
+                                    Unlink(deleteOutput->currentLink);
+                                }
+                            }
+                            DestroyNode(deleteNode);
+                        }
                     }
                     break;
                 case SDL_SCANCODE_RETURN:
