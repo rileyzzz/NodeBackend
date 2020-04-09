@@ -36,6 +36,9 @@ public:
 
 	typedef bool (*Action)(std::vector<Data*>);
 	Action nodeAction;
+
+	typedef Data* (*MyInput)();
+	MyInput nodeInput;
 	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, ContextCategory* inParent, Data* (*f)(std::vector<Data*>) = nullptr)
 	{
 		Type = Option_Type::CreateNode;
@@ -64,6 +67,21 @@ public:
 		if (f)
 		{
 			nodeAction = f;
+		}
+	}
+	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, ContextCategory* inParent, Data* (*f)(void) = nullptr)
+	{
+		Type = Option_Type::CreateNode;
+		NodeType = inType;
+		inPorts = inputs;
+		outPorts = outputs;
+		Name = inName;
+		Selected = false;
+		Parent = inParent;
+		Renderable = new ContextRenderable();
+		if (f)
+		{
+			nodeInput = f;
 		}
 	}
 };

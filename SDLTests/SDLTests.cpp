@@ -39,7 +39,13 @@ DataNode* CreateNode(Node::Node_Type type, std::vector<Input*> inputs, std::vect
     NodeStack.push_back(NewNode);
     return NewNode;
 }
-
+DataNode* CreateInputNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, Data* (*f)() = nullptr)
+{
+    DataNode* NewNode = new DataNode(IDcount, type, inputs, outputs, title, x, y, f);
+    IDcount++;
+    NodeStack.push_back(NewNode);
+    return NewNode;
+}
 static void DestroyNode(int id)
 {
     NodeStack.erase(NodeStack.begin() + id);
@@ -436,6 +442,9 @@ int main(int argc, char* argv[])
                                         break;
                                     case Node::Node_Type::Node_Action:
                                         NewNode = CreateActionNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, NewNodeX, NewNodeY, NodeConstructor->nodeAction);
+                                        break;
+                                    case Node::Node_Type::Node_Input:
+                                        NewNode = CreateInputNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, NewNodeX, NewNodeY, NodeConstructor->nodeInput);
                                         break;
                                     }
                                     break;

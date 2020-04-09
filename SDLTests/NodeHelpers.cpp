@@ -32,10 +32,25 @@ Data* CalculateLinkChain(Output* srcLink)
         switch (ParentNode->type)
         {
         case Node::Node_Type::Node_Input:
-            returnval = ParentNode->InputData;
+            if (ParentNode->InputData) 
+            {
+                returnval = ParentNode->InputData;
+            }
+            else
+            {
+                returnval = ParentNode->InputCalculate();
+            }
+            
             break;
         case Node::Node_Type::Node_Event:
-            returnval = ParentNode->InputData;
+            if (ParentNode->InputData)
+            {
+                returnval = ParentNode->InputData;
+            }
+            else
+            {
+                returnval = ParentNode->InputCalculate();
+            }
             break;
         case Node::Node_Type::Node_Calculation:
             if (ParentNode->inputs.size())
@@ -111,13 +126,16 @@ ContextMenu* GenerateContextMenu()
 
     ContextCategory* Math = new ContextCategory("Math");
     CM->Categories.push_back(Math);
+    ContextCategory* Trig = new ContextCategory("Trigonometry");
+    CM->Categories.push_back(Trig);
     ContextCategory* Comparison = new ContextCategory("Comparison");
     CM->Categories.push_back(Comparison);
     ContextCategory* Casting = new ContextCategory("Casting");
     CM->Categories.push_back(Casting);
     ContextCategory* Debug = new ContextCategory("Debug");
     CM->Categories.push_back(Debug);
-
+    ContextCategory* CInput = new ContextCategory("Input");
+    CM->Categories.push_back(CInput);
     //NODE DEFINITIONS
 
     //Math
@@ -162,6 +180,25 @@ ContextMenu* GenerateContextMenu()
         { DataPort(Data::Data_Type::Numeric) },
         { DataPort(Data::Data_Type::Numeric) }, "Negate", Math, NodeMath::Negate));
 
+    //Trig
+    Trig->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Sine", Trig, NodeTrig::Sin));
+    Trig->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Cosine", Trig, NodeTrig::Cos));
+    Trig->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Tangent", Trig, NodeTrig::Tan));
+    Trig->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Arc Sine", Trig, NodeTrig::Asin));
+    Trig->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Arc Cosine", Trig, NodeTrig::Acos));
+    Trig->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Arc Tangent", Trig, NodeTrig::Atan));
 
     //Comparison
     Comparison->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
@@ -191,9 +228,12 @@ ContextMenu* GenerateContextMenu()
         { DataPort(Data::Data_Type::String) },
         {  }, "Print", Debug, NodeDebug::Print));
 
-    //temporary
-    //Math->Show = true;
-    //Math->Options[0]->Selected = true;
+    //Input
+    CInput->Options.push_back(new NodeCreator(Node::Node_Type::Node_Input,
+        {  },
+        { DataPort(Data::Data_Type::Float) }, "Time", CInput, NodeInput::Time));
+
+    
 
     return CM;
 }

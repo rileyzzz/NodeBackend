@@ -108,6 +108,49 @@ Data* NodeMath::Negate(std::vector<Data*> Inputs)
     return new NodeFloat(-value1);
 }
 
+//Trig
+Data* NodeTrig::Sin(std::vector<Data*> Inputs)
+{
+    NodeNumeric* input1 = (NodeNumeric*)Inputs[0];
+    double value1 = input1->value;
+    return new NodeFloat(std::sin(value1));
+}
+
+Data* NodeTrig::Cos(std::vector<Data*> Inputs)
+{
+    NodeNumeric* input1 = (NodeNumeric*)Inputs[0];
+    double value1 = input1->value;
+    return new NodeFloat(std::cos(value1));
+}
+
+Data* NodeTrig::Tan(std::vector<Data*> Inputs)
+{
+    NodeNumeric* input1 = (NodeNumeric*)Inputs[0];
+    double value1 = input1->value;
+    return new NodeFloat(std::tan(value1));
+}
+
+Data* NodeTrig::Asin(std::vector<Data*> Inputs)
+{
+    NodeNumeric* input1 = (NodeNumeric*)Inputs[0];
+    double value1 = input1->value;
+    return new NodeFloat(std::asin(value1));
+}
+
+Data* NodeTrig::Acos(std::vector<Data*> Inputs)
+{
+    NodeNumeric* input1 = (NodeNumeric*)Inputs[0];
+    double value1 = input1->value;
+    return new NodeFloat(std::acos(value1));
+}
+
+Data* NodeTrig::Atan(std::vector<Data*> Inputs)
+{
+    NodeNumeric* input1 = (NodeNumeric*)Inputs[0];
+    double value1 = input1->value;
+    return new NodeFloat(std::atan(value1));
+}
+
 //Comparison
 Data* NodeComparison::And(std::vector<Data*> Inputs)
 {
@@ -176,4 +219,13 @@ bool NodeDebug::Print(std::vector<Data*> Inputs)
 
     PrinttoScreen(NewMessage);
     return true;
+}
+
+//Inputs ========================================
+time_t NodeInput::start = clock();
+Data* NodeInput::Time()
+{
+    //std::chrono::system_clock::now().time_since_epoch().count()
+    NodeFloat* curtime = new NodeFloat(difftime(clock(), start));
+    return curtime;
 }

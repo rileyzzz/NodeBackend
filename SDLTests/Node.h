@@ -77,6 +77,10 @@ class Node
 		//Should this be an input node, have a variable for the input data that can be changed on the fly. This should probably be moved to a subclass at some point
 		Data* InputData;
 
+		typedef Data* (*InputFunc)();
+
+		InputFunc InputCalculate;
+
 		typedef Data* (*CalcFunc)(std::vector<Data*>);
 
 		CalcFunc Calculate;
@@ -112,6 +116,40 @@ public:
 		if (f)
 		{
 			Calculate = (*f);
+		}
+
+		title = givenTitle;
+		renderable = new NodeDrawable();
+		renderable->x = x;
+		renderable->y = y;
+		Selected = false;
+		//std::cout << "Created node " << title << ".\n";
+	}
+	DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, Data* (*f)(void) = nullptr)
+	{
+		ID = givenID;
+		type = givenType;
+		inputs = givenInputs;
+		outputs = givenOutputs;
+		//set IO parents
+		if (inputs.size())
+		{
+			for (int iter = 0; iter < inputs.size(); iter++)
+			{
+				inputs[iter]->ParentNode = this;
+			}
+		}
+		if (outputs.size())
+		{
+			for (int iter = 0; iter < outputs.size(); iter++)
+			{
+				outputs[iter]->ParentNode = this;
+			}
+		}
+
+		if (f)
+		{
+			InputCalculate = (*f);
 		}
 
 		title = givenTitle;

@@ -33,6 +33,22 @@ public:
 	static Data* Negate(std::vector<Data*> Inputs);
 };
 
+class NodeTrig
+{
+public:
+	static Data* Sin(std::vector<Data*> Inputs);
+
+	static Data* Cos(std::vector<Data*> Inputs);
+
+	static Data* Tan(std::vector<Data*> Inputs);
+
+	static Data* Asin(std::vector<Data*> Inputs);
+
+	static Data* Acos(std::vector<Data*> Inputs);
+
+	static Data* Atan(std::vector<Data*> Inputs);
+};
+
 class NodeComparison
 {
 public:
@@ -67,4 +83,11 @@ public:
 	static std::vector<ConsoleMessage> console;
 	static void PrinttoScreen(ConsoleMessage text);
 	static void MessageThread(int MessageIndex, int waitTime);
+};
+
+class NodeInput
+{
+	static time_t start;
+public:
+	static Data* Time();
 };
