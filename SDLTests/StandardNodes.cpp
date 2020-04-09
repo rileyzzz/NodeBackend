@@ -101,6 +101,13 @@ Data* NodeMath::Pow(std::vector<Data*> Inputs)
     return new NodeFloat(std::pow(value1, value2));
 }
 
+Data* NodeMath::Negate(std::vector<Data*> Inputs)
+{
+    NodeNumeric* input1 = (NodeNumeric*)Inputs[0];
+    double value1 = input1->value;
+    return new NodeFloat(-value1);
+}
+
 //Comparison
 Data* NodeComparison::And(std::vector<Data*> Inputs)
 {

@@ -158,6 +158,10 @@ ContextMenu* GenerateContextMenu()
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric) },
         { DataPort(Data::Data_Type::Numeric) }, "Log", Math, NodeMath::Log));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Negate", Math, NodeMath::Negate));
+
 
     //Comparison
     Comparison->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,

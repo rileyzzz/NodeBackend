@@ -78,19 +78,19 @@ int main(int argc, char* argv[])
         printf("error initializing SDL: %s\n", SDL_GetError());
     }
 
-    //int scrw = 1920;
-    //int scrh = 1080;
-    //SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
-    //    SDL_WINDOWPOS_CENTERED,
-    //    SDL_WINDOWPOS_CENTERED,
-    //    scrw, scrh, 0);
-
-    int scrw = 3840;
-    int scrh = 2160;
+    int scrw = 1920;
+    int scrh = 1080;
     SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        scrw, scrh, SDL_WINDOW_FULLSCREEN);
+        scrw, scrh, 0);
+
+    //int scrw = 3840;
+    //int scrh = 2160;
+    //SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
+    //    SDL_WINDOWPOS_CENTERED,
+    //    SDL_WINDOWPOS_CENTERED,
+    //    scrw, scrh, SDL_WINDOW_FULLSCREEN);
 
     // triggers the program that controls 
     // your graphics hardware and sets flags 

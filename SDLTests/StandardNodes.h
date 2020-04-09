@@ -29,6 +29,8 @@ public:
 	static Data* Log(std::vector<Data*> Inputs);
 
 	static Data* Pow(std::vector<Data*> Inputs);
+
+	static Data* Negate(std::vector<Data*> Inputs);
 };
 
 class NodeComparison
