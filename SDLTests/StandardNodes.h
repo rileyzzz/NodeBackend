@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Node.h"
+
 //Math
 class NodeMath
 {
@@ -52,8 +53,16 @@ public:
 };
 
 //Debug
+struct ConsoleMessage
+{
+	const char* message;
+	int messageLength;
+};
 class NodeDebug
 {
 public:
 	static bool Print(std::vector<Data*> Inputs);
+	static std::vector<ConsoleMessage> console;
+	static void PrinttoScreen(ConsoleMessage text);
+	static void MessageThread(int MessageIndex, int waitTime);
 };

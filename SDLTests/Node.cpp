@@ -3,7 +3,8 @@
 
 Data* Node::CalculateInputs()
 {
-    CalculatedInputs.clear();
+    //CalculatedInputs.clear();
+    std::vector<Data*> sendInputs;
     //Loop through every input required for our output node.
     for (int nodeInputID = 0; nodeInputID < inputs.size(); nodeInputID++)
     {
@@ -12,16 +13,17 @@ Data* Node::CalculateInputs()
         //Recursion through entire link tree.
         if (nodeInput->link)
         {
-            CalculatedInputs.push_back(CalculateLinkChain(nodeInput->link));
+            sendInputs.push_back(CalculateLinkChain(nodeInput->link));
         }
         else
         {
-            CalculatedInputs.push_back(GetNodeDefault(nodeInput->port.PortType));
+            sendInputs.push_back(GetNodeDefault(nodeInput->port.PortType));
         }
     }
     //returns the first calculated input, for ease of use with basic output nodes.
     //this does however support multiple inputs, simply access the CalculatedInputs vector.
-    return CalculatedInputs[0];
+    CalculatedInputs = sendInputs;
+    return sendInputs[0];
 }
 
 void ActionNode::Run()

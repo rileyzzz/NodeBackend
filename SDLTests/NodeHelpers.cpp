@@ -25,7 +25,7 @@ std::vector<Output*> CreateOutputs(std::vector<DataPort> itemarray)
 Data* CalculateLinkChain(Output* srcLink)
 {
     Node* ParentNode = srcLink->ParentNode;
-
+    
     if (ParentNode)
     {
         Data* returnval = nullptr;
@@ -40,19 +40,21 @@ Data* CalculateLinkChain(Output* srcLink)
         case Node::Node_Type::Node_Calculation:
             if (ParentNode->inputs.size())
             {
-                ParentNode->CalculatedInputs.clear();
+                //ParentNode->CalculatedInputs.clear();
+                std::vector<Data*> sendInputs;
                 for (int dependency = 0; dependency < ParentNode->inputs.size(); dependency++)
                 {
                     if (ParentNode->inputs[dependency]->link)
                     {
-                        ParentNode->CalculatedInputs.push_back(CalculateLinkChain(ParentNode->inputs[dependency]->link));
+                        sendInputs.push_back(CalculateLinkChain(ParentNode->inputs[dependency]->link));
                     }
                     else
                     {
-                        ParentNode->CalculatedInputs.push_back(GetNodeDefault(ParentNode->inputs[dependency]->port.PortType));
+                        sendInputs.push_back(GetNodeDefault(ParentNode->inputs[dependency]->port.PortType));
                     }
                 }
-                returnval = ParentNode->Calculate(ParentNode->CalculatedInputs);
+                returnval = ParentNode->Calculate(sendInputs);
+                ParentNode->CalculatedInputs = sendInputs;
             }
             break;
 
@@ -169,3 +171,7 @@ ContextMenu* GenerateContextMenu()
 
     return CM;
 }
+
+//Debug
+
+

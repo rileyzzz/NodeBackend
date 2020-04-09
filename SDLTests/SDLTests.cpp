@@ -11,6 +11,7 @@
 #include "NodeHelpers.h"
 #include "StandardNodes.h"
 #include "SDL_ttf.h"
+#include <string>
 #include <algorithm>
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
@@ -27,6 +28,8 @@ int MMoffsetY = 0;
 int gridParallaxAmount = 4;
 
 int globalScaleFactor = 1;
+
+bool DrawNodeOutput = true;
 
 DataNode* CreateNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
 {
@@ -63,6 +66,8 @@ void GetGridCoordinates(int x, int y, int* sendX, int* sendY)
     *sendX = (x - (gridoffsetX + MMoffsetX)) / globalScaleFactor;
     *sendY = (y - (gridoffsetY + MMoffsetY)) / globalScaleFactor;
 }
+
+
 
 int main(int argc, char* argv[])
 {
@@ -230,8 +235,6 @@ int main(int argc, char* argv[])
 
     //Once again, event input data is managed through the InputData variable, since an event can also act as an input - completely optional
     EventExampleNode->InputData = new NodeString("Testing from the Event node!");
-
-
 
 
     std::vector<DataPort> strinPorts{  };
@@ -812,6 +815,67 @@ int main(int argc, char* argv[])
             SDL_FreeSurface(nodeMessage);
             TTF_CloseFont(Sans);
 
+            int OutputTextSize = 8 * globalScaleFactor;
+            if (DrawNodeOutput && curNode->type == Node::Node_Type::Node_Output)
+            {
+                
+                TTF_Font* OutputFont = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/consola.ttf", OutputTextSize);
+                std::string Outputtext = "undefined";
+                curNode->CalculateInputs();
+                if (!curNode->CalculatedInputs.empty())
+                {
+                    Data* CalculatedInput = curNode->CalculatedInputs[0];
+                    switch (CalculatedInput->subtype)
+                    {
+                        case Data::Data_Type::Boolean:
+                        {
+                            NodeBoolean* castData = (NodeBoolean*)CalculatedInput;
+                            bool value = castData->value;
+                            Outputtext = std::to_string(value);
+                            break;
+                        }
+                        case Data::Data_Type::Numeric:
+                        case Data::Data_Type::Float:
+                        {
+                            NodeFloat* castData = (NodeFloat*)CalculatedInput;
+                            double value = castData->value;
+                            Outputtext = std::to_string(value);
+                            break;
+                        }
+                        case Data::Data_Type::Integer:
+                        {
+                            NodeInteger* castData = (NodeInteger*)CalculatedInput;
+                            int value = castData->value;
+                            Outputtext = std::to_string(value);
+                            break;
+                        }
+                        case Data::Data_Type::String:
+                        {
+                            NodeString* castData = (NodeString*)CalculatedInput;
+                            const char* value = castData->value;
+                            Outputtext = value;
+                            break;
+                        }
+                    }
+                }
+                const char* OutputChar = Outputtext.c_str();
+                SDL_Surface* OutputnodeMessage = TTF_RenderText_Solid(OutputFont, OutputChar, White);
+
+                SDL_Texture* OutputMessage = SDL_CreateTextureFromSurface(rend, OutputnodeMessage);
+
+                SDL_Rect OutputMessage_rect;
+                OutputMessage_rect.x = drawX + 2 * globalScaleFactor;
+                OutputMessage_rect.y = drawY + (NodeElement.h - OutputTextSize) - 2 * globalScaleFactor;
+
+                TTF_SizeText(OutputFont, OutputChar, &OutputMessage_rect.w, &OutputMessage_rect.h);
+
+                SDL_RenderCopy(rend, OutputMessage, NULL, &OutputMessage_rect);
+
+                SDL_DestroyTexture(OutputMessage);
+                SDL_FreeSurface(OutputnodeMessage);
+                TTF_CloseFont(OutputFont);
+            }
+            
             //draw ports
             
             //actual circle
@@ -1044,7 +1108,31 @@ int main(int argc, char* argv[])
             }
         }
 
+        //Draw Console
+        TTF_Font* ConsoleFont = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/consola.ttf", 24);
+        SDL_Color White = { 255, 255, 255 };
+        int ConsoleLeftMargin = 4;
+        int LineSize = 30;
+        for (int lineIndex = 0; lineIndex < NodeDebug::console.size(); lineIndex++)
+        {
+            int ConsoleTop = scrh - NodeDebug::console.size() * LineSize;
+            const char* text = NodeDebug::console[lineIndex].message;
+            SDL_Surface* ConsolesurfMessage = TTF_RenderText_Solid(ConsoleFont, text, White);
+            SDL_Texture* ConsoleMessage = SDL_CreateTextureFromSurface(rend, ConsolesurfMessage);
 
+            SDL_Rect ConsoleMessage_rect;
+            ConsoleMessage_rect.x = ConsoleLeftMargin;
+            ConsoleMessage_rect.y = ConsoleTop + lineIndex * LineSize;
+
+            TTF_SizeText(ConsoleFont, text, &ConsoleMessage_rect.w, &ConsoleMessage_rect.h);
+
+            SDL_RenderCopy(rend, ConsoleMessage, NULL, &ConsoleMessage_rect);
+
+            SDL_DestroyTexture(ConsoleMessage);
+            SDL_FreeSurface(ConsolesurfMessage);
+        }
+
+        TTF_CloseFont(ConsoleFont);
         //End Draw
         // triggers the double buffers 
         // for multiple rendering 
