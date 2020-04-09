@@ -39,6 +39,15 @@ Data* NodeMath::Divide(std::vector<Data*> Inputs)
     return new NodeFloat(value1 / value2);
 }
 
+Data* NodeMath::Mod(std::vector<Data*> Inputs)
+{
+    NodeNumeric* input1 = (NodeNumeric*)Inputs[0];
+    int value1 = input1->value;
+    NodeNumeric* input2 = (NodeNumeric*)Inputs[1];
+    int value2 = input2->value;
+    return new NodeInteger(value1 % value2);
+}
+
 Data* NodeMath::Abs(std::vector<Data*> Inputs)
 {
     NodeNumeric* input1 = (NodeNumeric*)Inputs[0];
@@ -103,6 +112,12 @@ Data* NodeComparison::Or(std::vector<Data*> Inputs)
     NodeBoolean* input1 = (NodeBoolean*)Inputs[0];
     NodeBoolean* input2 = (NodeBoolean*)Inputs[1];
     return new NodeBoolean(input1->value || input2->value);
+}
+
+Data* NodeComparison::Not(std::vector<Data*> Inputs)
+{
+    NodeBoolean* input1 = (NodeBoolean*)Inputs[0];
+    return new NodeBoolean(!input1->value);
 }
 
 //Casting

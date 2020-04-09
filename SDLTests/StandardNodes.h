@@ -13,6 +13,8 @@ public:
 
 	static Data* Divide(std::vector<Data*> Inputs);
 
+	static Data* Mod(std::vector<Data*> Inputs);
+
 	static Data* Abs(std::vector<Data*> Inputs);
 
 	static Data* Sqrt(std::vector<Data*> Inputs);
@@ -34,6 +36,8 @@ public:
 	static Data* And(std::vector<Data*> Inputs);
 
 	static Data* Or(std::vector<Data*> Inputs);
+
+	static Data* Not(std::vector<Data*> Inputs);
 };
 
 //Casting

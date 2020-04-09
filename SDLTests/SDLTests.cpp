@@ -263,7 +263,14 @@ int main(int argc, char* argv[])
     std::vector<Input*> AndnodeInputs = CreateInputs(AndinPorts);
     std::vector<Output*> AndnodeOutputs = CreateOutputs(AndoutPorts);
 
-    DataNode* AndExampleNode = CreateNode(Node::Node_Type::Node_Calculation, AndnodeInputs, AndnodeOutputs, "And", 150, 425, NodeComparison::And);
+    DataNode* AndExampleNode = CreateNode(Node::Node_Type::Node_Calculation, AndnodeInputs, AndnodeOutputs, "And", 150, 400, NodeComparison::And);
+
+    std::vector<DataPort> OrinPorts{ DataPort(Data::Data_Type::Boolean), DataPort(Data::Data_Type::Boolean) };
+    std::vector<DataPort> OroutPorts{ DataPort(Data::Data_Type::Boolean) };
+    std::vector<Input*> OrnodeInputs = CreateInputs(OrinPorts);
+    std::vector<Output*> OrnodeOutputs = CreateOutputs(OroutPorts);
+
+    DataNode* OrExampleNode = CreateNode(Node::Node_Type::Node_Calculation, OrnodeInputs, OrnodeOutputs, "Or", 150, 475, NodeComparison::Or);
 
     std::vector<DataPort> CompinPorts{ DataPort(Data::Data_Type::Boolean) };
     std::vector<DataPort> CompoutPorts{ };
