@@ -96,6 +96,7 @@ public:
 	Data::Data_Type PortType;
 	Data::Data_Type SubType;
 	int renderX, renderY;
+	int offsetX, offsetY;
 	DataPort(Data::Data_Type inType = Data::Data_Type::None)
 	{
 		PortType = inType;
@@ -109,5 +110,7 @@ public:
 		}
 		renderX = 0;
 		renderY = 0;
+		offsetX = 0;
+		offsetY = 0;
 	}
 };

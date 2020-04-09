@@ -440,9 +440,10 @@ int main(int argc, char* argv[])
                         {
                             DataPort* Curport = &checkNode->inputs[Portcount]->port;
 
-                            if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize)
+                            if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize && mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
                             {
-                                if (mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
+                                //make sure it's already linked
+                                if (checkNode->inputs[Portcount]->link)
                                 {
                                     currentDragPort = Curport;
                                     currentDragPortParent = checkNode->inputs[Portcount];
@@ -457,14 +458,11 @@ int main(int argc, char* argv[])
                         {
                             DataPort* Curport = &checkNode->outputs[Portcount]->port;
 
-                            if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize)
+                            if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize && mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
                             {
-                                if (mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
-                                {
-                                    currentDragNewPort = Curport;
-                                    currentDragNewPortParent = checkNode->outputs[Portcount];
-                                    draggingNewPort = true;
-                                }
+                                currentDragNewPort = Curport;
+                                currentDragNewPortParent = checkNode->outputs[Portcount];
+                                draggingNewPort = true;
                             }
                             if (draggingNewPort) break;
                         }
@@ -519,10 +517,12 @@ int main(int argc, char* argv[])
             case SDL_MOUSEBUTTONUP:
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT:
+                {
                     //std::cout << "Left mouse released\n";
                     int mouseX, mouseY;
                     SDL_GetMouseState(&mouseX, &mouseY);
                     //port test
+                    bool HitPort = false;
                     for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
                     {
                         Node* checkNode = NodeStack[Nodecount];
@@ -534,14 +534,15 @@ int main(int argc, char* argv[])
                             {
                                 DataPort* Curport = &checkNode->inputs[Portcount]->port;
 
-                                if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize)
+                                if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize && mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
                                 {
-                                    if (mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
+                                    HitPort = true;
+                                    if (currentDragPort != Curport && currentDragPortParent->ParentNode != checkNode->inputs[Portcount]->ParentNode)
                                     {
-                                        if (currentDragPort != Curport && currentDragPortParent->type == Linkable::Link_Type::Input && currentDragPort->SubType == checkNode->inputs[Portcount]->port.SubType)
+                                        if (currentDragPortParent->type == Linkable::Link_Type::Input && currentDragPort->SubType == checkNode->inputs[Portcount]->port.SubType)
                                         {
                                             //std::cout << "Dragged to different output!";
-
+                                            
                                             //need to get the linked IO, not the IO itself - this will be out new link source
                                             Input* movedIO = (Input*)currentDragPortParent;
                                             Output* other = movedIO->link;
@@ -574,7 +575,7 @@ int main(int argc, char* argv[])
                                 }
                             }
                         }
-                       
+
 
 
                         //outputs
@@ -584,31 +585,37 @@ int main(int argc, char* argv[])
                             {
                                 DataPort* Curport = &checkNode->inputs[Portcount]->port;
 
-                                if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize)
+                                if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize && mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
                                 {
-                                    if (mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
+                                    if (currentDragNewPort != Curport && currentDragNewPortParent->ParentNode != checkNode->inputs[Portcount]->ParentNode && currentDragNewPortParent->type == Linkable::Link_Type::Output && currentDragNewPort->SubType == checkNode->inputs[Portcount]->port.SubType)
                                     {
-                                        if (currentDragNewPort != Curport && currentDragNewPortParent->type == Linkable::Link_Type::Output && currentDragNewPort->SubType == checkNode->inputs[Portcount]->port.SubType)
+                                        //std::cout << "Dragged to different output!";
+                                        if (checkNode->inputs[Portcount]->currentLink)
                                         {
-                                            //std::cout << "Dragged to different output!";
-                                            if (checkNode->inputs[Portcount]->currentLink)
-                                            {
-                                                LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), checkNode->inputs[Portcount]->currentLink), LinkStack.end());
-                                                Unlink(checkNode->inputs[Portcount]->currentLink);
-                                            }
-                                            LinkStack.push_back(new Link((Output*)currentDragNewPortParent, checkNode->inputs[Portcount]));
+                                            LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), checkNode->inputs[Portcount]->currentLink), LinkStack.end());
+                                            Unlink(checkNode->inputs[Portcount]->currentLink);
                                         }
+                                        LinkStack.push_back(new Link((Output*)currentDragNewPortParent, checkNode->inputs[Portcount]));
                                     }
+
                                 }
                             }
                         }
-                        
+
+
                     }
-                    if (currentDragPortParent && currentDragPortParent->currentLink)
+
+                    if (currentDragPortParent && currentDragPortParent->currentLink && !HitPort)
                     {
                         LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), currentDragPortParent->currentLink), LinkStack.end());
                         Unlink(currentDragPortParent->currentLink);
                     }
+                    if (currentDragPort)
+                    {
+                        currentDragPort->offsetX = 0;
+                        currentDragPort->offsetY = 0;
+                    }
+                    
 
                     draggingNode = false;
                     currentDrag = nullptr;
@@ -619,6 +626,7 @@ int main(int argc, char* argv[])
                     currentDragNewPort = nullptr;
                     currentDragNewPortParent = nullptr;
                     break;
+                }
                 case SDL_BUTTON_RIGHT:
                     //std::cout << "Right mouse released\n";
                     break;
@@ -730,9 +738,10 @@ int main(int argc, char* argv[])
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
 
-            currentDragPort->renderX = mouseX;
-            currentDragPort->renderY = mouseY;
+            currentDragPort->offsetX = mouseX - currentDragPort->renderX;
+            currentDragPort->offsetY = mouseY - currentDragPort->renderY;
         }
+
 
         if (draggingNewPort)
         {
@@ -748,7 +757,7 @@ int main(int argc, char* argv[])
             Link* current = LinkStack[curLink];
 
             SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
-            SDL_RenderDrawLine(rend, current->LinkInput->port.renderX, current->LinkInput->port.renderY, current->LinkOutput->port.renderX, current->LinkOutput->port.renderY);
+            SDL_RenderDrawLine(rend, current->LinkInput->port.renderX + current->LinkInput->port.offsetX, current->LinkInput->port.renderY + current->LinkInput->port.offsetY, current->LinkOutput->port.renderX + current->LinkOutput->port.offsetX, current->LinkOutput->port.renderY + current->LinkOutput->port.offsetY);
         }
 
 
@@ -941,9 +950,9 @@ int main(int argc, char* argv[])
             for (int CategoryIndex = 0; CategoryIndex < CategoryCount; CategoryIndex++)
             {
                 ContextCategory* CurCategory = RightClickContext->Categories[CategoryIndex];
-                TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", 12); //this opens a font style and sets a size
+                TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", 16); //this opens a font style and sets a size
                 SDL_Color White = { 255, 255, 255 };  // this is the color in rgb format, maxing out all would give you the color white, and it will be your text's color
-
+                int TextMargin = 2;
                 
                 CurCategory->Renderable->w = Background.w;
                 CurCategory->Renderable->h = OptionSize + OptionMargin; // add option margin to help selection bounds
@@ -1005,7 +1014,7 @@ int main(int argc, char* argv[])
                         SDL_Texture* SelectionMessage = SDL_CreateTextureFromSurface(rend, SelectionsurfMessage);
 
                         SDL_Rect SelectionMessage_rect;
-                        SelectionMessage_rect.x = SubmenuBackground.x;
+                        SelectionMessage_rect.x = SubmenuBackground.x + TextMargin;
                         SelectionMessage_rect.y = SubmenuBackground.y + OptionMargin + (OptionSize + OptionMargin) * SelectionIndex;
 
                         TTF_SizeText(Sans, Selectiontext, &SelectionMessage_rect.w, &SelectionMessage_rect.h);
@@ -1025,7 +1034,7 @@ int main(int argc, char* argv[])
                 SDL_Texture* Message = SDL_CreateTextureFromSurface(rend, nodeMessage);
 
                 SDL_Rect Message_rect;
-                Message_rect.x = Background.x;
+                Message_rect.x = Background.x + TextMargin;
                 Message_rect.y = Background.y + OptionMargin + (OptionSize + OptionMargin) * CategoryIndex;
 
                 TTF_SizeText(Sans, text, &Message_rect.w, &Message_rect.h);
