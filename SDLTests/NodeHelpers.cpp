@@ -134,6 +134,28 @@ ContextMenu* GenerateContextMenu()
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Integer), DataPort(Data::Data_Type::Integer) },
         { DataPort(Data::Data_Type::Integer) }, "Modulo", NodeMath::Mod));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Pow", NodeMath::Pow));
+
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Abs", NodeMath::Abs));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Square Root", NodeMath::Sqrt));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Round", NodeMath::Round));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Floor", NodeMath::Floor));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Ceil", NodeMath::Ceil));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Log", NodeMath::Log));
 
 
     //Debug
