@@ -30,6 +30,7 @@ int gridParallaxAmount = 4;
 int globalScaleFactor = 1;
 
 bool DrawNodeOutput = true;
+bool ctrlHeld = false;
 
 DataNode* CreateNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
 {
@@ -132,7 +133,7 @@ int main(int argc, char* argv[])
 
     bool showNodeList = false;
     bool draggingNode = false;
-    Node* currentDrag = nullptr;
+    std::vector<Node*> currentDrag;
     bool draggingPort = false;
     DataPort* currentDragPort = nullptr;
     Linkable* currentDragPortParent = nullptr;
@@ -351,6 +352,15 @@ int main(int argc, char* argv[])
                 case SDL_SCANCODE_RIGHT:
                     gridoffsetX += speed / 30;
                     break;
+                case SDL_SCANCODE_LSHIFT:
+                    ctrlHeld = true;
+                    break;
+                case SDL_SCANCODE_ESCAPE:
+                    currentDrag.clear();
+                    for (const auto& unselectNode : NodeStack) {
+                        unselectNode->Selected = false;
+                    }
+                    break;
                 case SDL_SCANCODE_RETURN:
                 {
                     //Run our blueprint
@@ -379,6 +389,14 @@ int main(int argc, char* argv[])
                     showNodeList = !showNodeList;
                     break;
                 }
+                break;
+            case SDL_KEYUP:
+                switch (event.key.keysym.scancode) {
+                case SDL_SCANCODE_LSHIFT:
+                    ctrlHeld = false;
+                    break;
+                }
+                break;
             case SDL_MOUSEBUTTONDOWN:
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
@@ -478,20 +496,49 @@ int main(int argc, char* argv[])
                         Node* checkNode = NodeStack[Nodecount];
                         NodeDrawable* renderable = checkNode->renderable;
 
-                        if (mouseX > renderable->renderX&& mouseX < renderable->renderX + renderable->width * globalScaleFactor)
+                        if (mouseX > renderable->renderX&& mouseX < renderable->renderX + renderable->width * globalScaleFactor && mouseY > renderable->renderY&& mouseY < renderable->renderY + renderable->currentHeight)
                         {
-                            if (mouseY > renderable->renderY&& mouseY < renderable->renderY + renderable->currentHeight)
+                            //std::cout << "clicked a node!";
+                            renderable->mouseStartX = mouseX;
+                            renderable->mouseStartY = mouseY;
+                            renderable->StartX = renderable->x;
+                            renderable->StartY = renderable->y;
+
+                            bool removed = false;
+                            if (ctrlHeld && std::count(currentDrag.begin(), currentDrag.end(), checkNode))
                             {
-                                //std::cout << "clicked a node!";
-                                renderable->mouseStartX = mouseX;
-                                renderable->mouseStartY = mouseY;
-                                renderable->StartX = renderable->x;
-                                renderable->StartY = renderable->y;
-
-                                currentDrag = checkNode;
-                                draggingNode = true;
-
+                                removed = true;
+                                currentDrag.erase(std::remove(currentDrag.begin(), currentDrag.end(), checkNode), currentDrag.end());
+                                checkNode->Selected = false;
                             }
+
+                            if (!ctrlHeld)
+                            {
+                                for (const auto& unselectNode : NodeStack) {
+                                    unselectNode->Selected = false;
+                                }
+                                currentDrag.clear();
+                            }
+                            else
+                            {
+                                for (const auto& selectNode : currentDrag) {
+                                    selectNode->renderable->mouseStartX = mouseX;
+                                    selectNode->renderable->mouseStartY = mouseY;
+                                    selectNode->renderable->StartX = selectNode->renderable->x;
+                                    selectNode->renderable->StartY = selectNode->renderable->y;
+                                }
+                            }
+                            if (!removed)
+                            {
+                                currentDrag.push_back(checkNode);
+                                checkNode->Selected = true;
+                            }
+
+                            draggingNode = true;
+
+                            
+                            
+                            
                         }
                     }
 
@@ -617,7 +664,7 @@ int main(int argc, char* argv[])
                     
 
                     draggingNode = false;
-                    currentDrag = nullptr;
+                    //currentDrag.clear();
                     draggingPort = false;
                     currentDragPort = nullptr;
                     currentDragPortParent = nullptr;
@@ -664,15 +711,17 @@ int main(int argc, char* argv[])
         }
         if (draggingNode)
         {
-            NodeDrawable* renderable = currentDrag->renderable;
+            for (const auto& SelectedNode : currentDrag) {
+                NodeDrawable* renderable = SelectedNode->renderable;
 
-            int mouseX, mouseY;
-            SDL_GetMouseState(&mouseX, &mouseY);
-            int deltaMouseX = mouseX - renderable->mouseStartX;
-            int deltaMouseY = mouseY - renderable->mouseStartY;
+                int mouseX, mouseY;
+                SDL_GetMouseState(&mouseX, &mouseY);
+                int deltaMouseX = mouseX - renderable->mouseStartX;
+                int deltaMouseY = mouseY - renderable->mouseStartY;
 
-            renderable->x = renderable->StartX + deltaMouseX / globalScaleFactor;
-            renderable->y = renderable->StartY + deltaMouseY / globalScaleFactor;
+                renderable->x = renderable->StartX + deltaMouseX / globalScaleFactor;
+                renderable->y = renderable->StartY + deltaMouseY / globalScaleFactor;
+            }
         }
         //context menu hit test
         if(ContextMenuOpen)
@@ -686,6 +735,9 @@ int main(int argc, char* argv[])
                 ContextRenderable* renderable = Option->Renderable;
                 if (mouseX > renderable->x && mouseX < renderable->x + renderable->w && mouseY > renderable->y && mouseY < renderable->y + renderable->h)
                 {
+                    for (const auto& otherOption : OptionStack) {
+                        otherOption->Selected = false;
+                    }
                     Option->Selected = true;
                     skipCategoryCheck = true;
                 }
@@ -784,6 +836,18 @@ int main(int argc, char* argv[])
             NodeElement.y = drawY;
             renderable->renderX = drawX;
             renderable->renderY = drawY;
+
+            if (curNode->Selected)
+            {
+                int BorderThickness = globalScaleFactor;
+                SDL_Rect SelectionBG;
+                SelectionBG.x = NodeElement.x - BorderThickness;
+                SelectionBG.y = NodeElement.y - BorderThickness;
+                SelectionBG.w = NodeElement.w + BorderThickness * 2;
+                SelectionBG.h = NodeElement.h + BorderThickness * 2;
+                SDL_SetRenderDrawColor(rend, 255, 147, 0, 255);
+                SDL_RenderFillRect(rend, &SelectionBG);
+            }
 
             SDL_SetRenderDrawColor(rend, 40, 40, 50, 255);
             SDL_RenderFillRect(rend, &NodeElement);
@@ -991,14 +1055,15 @@ int main(int argc, char* argv[])
         {
             //std::cout << "drawing context menu";
             
-            int OptionSize = 20;
+            int OptionSize = 28;
             int OptionMargin = 2;
+            int OptionTextSize = 18;
             int CategoryCount = RightClickContext->Categories.size();
 
             int Overallheight = OptionSize * CategoryCount + OptionMargin * (CategoryCount + 1);
             //Draw main CM background
             SDL_Rect Background;
-            Background.w = 100;
+            Background.w = 140;
             Background.h = Overallheight;
             Background.x = ContextX;
             Background.y = ContextY;
@@ -1010,7 +1075,7 @@ int main(int argc, char* argv[])
             for (int CategoryIndex = 0; CategoryIndex < CategoryCount; CategoryIndex++)
             {
                 ContextCategory* CurCategory = RightClickContext->Categories[CategoryIndex];
-                TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", 16); //this opens a font style and sets a size
+                TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", OptionTextSize); //this opens a font style and sets a size
                 SDL_Color White = { 255, 255, 255 };  // this is the color in rgb format, maxing out all would give you the color white, and it will be your text's color
                 int TextMargin = 2;
                 

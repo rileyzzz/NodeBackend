@@ -65,6 +65,7 @@ class Node
 		std::vector<Input*> inputs;
 		std::vector<Output*> outputs;
 		
+		bool Selected;
 
 		const char* title;
 
@@ -117,7 +118,7 @@ public:
 		renderable = new NodeDrawable();
 		renderable->x = x;
 		renderable->y = y;
-
+		Selected = false;
 		//std::cout << "Created node " << title << ".\n";
 	}
 };
@@ -169,7 +170,7 @@ public:
 		renderable = new NodeDrawable();
 		renderable->x = x;
 		renderable->y = y;
-
+		Selected = false;
 		//std::cout << "Created node " << title << ".\n";
 	}
 };

@@ -159,6 +159,28 @@ ContextMenu* GenerateContextMenu()
         { DataPort(Data::Data_Type::Numeric) },
         { DataPort(Data::Data_Type::Numeric) }, "Log", NodeMath::Log));
 
+    //Comparison
+    Comparison->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Boolean), DataPort(Data::Data_Type::Boolean) },
+        { DataPort(Data::Data_Type::Boolean) }, "And", NodeComparison::And));
+    Comparison->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Boolean), DataPort(Data::Data_Type::Boolean) },
+        { DataPort(Data::Data_Type::Boolean) }, "Or", NodeComparison::Or));
+
+    Comparison->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Boolean) },
+        { DataPort(Data::Data_Type::Boolean) }, "Not", NodeComparison::Not));
+
+    //Casting
+    Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Boolean) },
+        { DataPort(Data::Data_Type::Integer) }, "Bool to Int", NodeCast::BooltoInt));
+    Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Integer) },
+        { DataPort(Data::Data_Type::Boolean) }, "Int to Bool", NodeCast::InttoBool));
+    Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Integer) },
+        { DataPort(Data::Data_Type::Float) }, "Int to Float", NodeCast::InttoFloat));
 
     //Debug
     Debug->Options.push_back(new NodeCreator(Node::Node_Type::Node_Action,
