@@ -537,40 +537,37 @@ int main(int argc, char* argv[])
                                 if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize && mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
                                 {
                                     HitPort = true;
-                                    if (currentDragPort != Curport && currentDragPortParent->ParentNode != checkNode->inputs[Portcount]->ParentNode)
+                                    if (currentDragPort != Curport && currentDragPortParent->type == Linkable::Link_Type::Input && currentDragPort->SubType == checkNode->inputs[Portcount]->port.SubType)
                                     {
-                                        if (currentDragPortParent->type == Linkable::Link_Type::Input && currentDragPort->SubType == checkNode->inputs[Portcount]->port.SubType)
-                                        {
-                                            //std::cout << "Dragged to different output!";
+                                        //std::cout << "Dragged to different output!";
                                             
-                                            //need to get the linked IO, not the IO itself - this will be out new link source
-                                            Input* movedIO = (Input*)currentDragPortParent;
-                                            Output* other = movedIO->link;
+                                        //need to get the linked IO, not the IO itself - this will be out new link source
+                                        Input* movedIO = (Input*)currentDragPortParent;
+                                        Output* other = movedIO->link;
 
-                                            /*if (other)
-                                            {
-                                                std::cout << "yeah it worked";
-                                            }
-                                            else
-                                            {
-                                                std::cout << "didnt work";
-                                            }*/
-
-                                            //destroy both links entirely
-                                            //and remove from link stack
-                                            if (movedIO->currentLink)
-                                            {
-                                                LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), movedIO->currentLink), LinkStack.end());
-                                                Unlink(movedIO->currentLink);
-                                            }
-
-                                            if (checkNode->inputs[Portcount]->currentLink)
-                                            {
-                                                LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), checkNode->inputs[Portcount]->currentLink), LinkStack.end());
-                                                Unlink(checkNode->inputs[Portcount]->currentLink);
-                                            }
-                                            LinkStack.push_back(new Link(other, checkNode->inputs[Portcount]));
+                                        /*if (other)
+                                        {
+                                            std::cout << "yeah it worked";
                                         }
+                                        else
+                                        {
+                                            std::cout << "didnt work";
+                                        }*/
+
+                                        //destroy both links entirely
+                                        //and remove from link stack
+                                        if (movedIO->currentLink)
+                                        {
+                                            LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), movedIO->currentLink), LinkStack.end());
+                                            Unlink(movedIO->currentLink);
+                                        }
+
+                                        if (checkNode->inputs[Portcount]->currentLink)
+                                        {
+                                            LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), checkNode->inputs[Portcount]->currentLink), LinkStack.end());
+                                            Unlink(checkNode->inputs[Portcount]->currentLink);
+                                        }
+                                        LinkStack.push_back(new Link(other, checkNode->inputs[Portcount]));
                                     }
                                 }
                             }
