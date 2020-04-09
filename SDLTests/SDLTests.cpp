@@ -190,19 +190,19 @@ int main(int argc, char* argv[])
     LinkStack.push_back(new Link(ExampleNode2, 1, tempExampleNode, 0));
 
 
-    Data* outputresult = ExampleNode3->CalculateInputs();
-    NodeFloat* calcvalue = (NodeFloat*)outputresult;
+    //Data* outputresult = ExampleNode3->CalculateInputs();
+    //NodeFloat* calcvalue = (NodeFloat*)outputresult;
 
-    std::cout << "Output result is: ";
-    if (outputresult->type == Data::Data_Type::Float)
-    {
-        std::cout << "success - value is: ";
-        std::cout << calcvalue->value;
-    }
-    else {
-        std::cout << "fail";
-    }
-    std::cout << "\n";
+    //std::cout << "Output result is: ";
+    //if (outputresult->type == Data::Data_Type::Float)
+    //{
+    //    std::cout << "success - value is: ";
+    //    std::cout << calcvalue->value;
+    //}
+    //else {
+    //    std::cout << "fail";
+    //}
+    //std::cout << "\n";
 
 
     //Example Action Graph
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
     std::vector<Input*> EventnodeInputs;
     std::vector<Output*> EventnodeOutputs = CreateOutputs(EventoutPorts);
 
-    ActionNode* EventExampleNode = CreateActionNode(Node::Node_Type::Node_Event, EventnodeInputs, EventnodeOutputs, "Event Tick", 0, 200);
+    ActionNode* EventExampleNode = CreateActionNode(Node::Node_Type::Node_Event, EventnodeInputs, EventnodeOutputs, "Key Enter", 0, 200);
 
 
     std::vector<DataPort> PrintinPorts{ DataPort(Data::Data_Type::String) };
@@ -231,7 +231,6 @@ int main(int argc, char* argv[])
     //Once again, event input data is managed through the InputData variable, since an event can also act as an input - completely optional
     EventExampleNode->InputData = new NodeString("Testing from the Event node!");
 
-    EventExampleNode->Run();
 
 
 

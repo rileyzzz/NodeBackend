@@ -118,7 +118,7 @@ public:
 		renderable->x = x;
 		renderable->y = y;
 
-		std::cout << "Created node " << title << ".\n";
+		//std::cout << "Created node " << title << ".\n";
 	}
 };
 
@@ -170,7 +170,7 @@ public:
 		renderable->x = x;
 		renderable->y = y;
 
-		std::cout << "Created node " << title << ".\n";
+		//std::cout << "Created node " << title << ".\n";
 	}
 };
 
