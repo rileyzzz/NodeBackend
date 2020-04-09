@@ -1,4 +1,5 @@
 #include "NodeHelpers.h"
+#include "StandardNodes.h"
 
 
 std::vector<Input*> CreateInputs(std::vector<DataPort> itemarray)
@@ -100,4 +101,32 @@ Data* GetNodeDefault(Data::Data_Type intype)
     default:
         return new NodeNone();
     }
+}
+
+ContextMenu* GenerateContextMenu()
+{
+    ContextMenu* CM = new ContextMenu();
+
+    ContextCategory* Math = new ContextCategory("Math");
+    CM->Categories.push_back(Math);
+    ContextCategory* Comparison = new ContextCategory("Comparison");
+    CM->Categories.push_back(Comparison);
+    ContextCategory* Casting = new ContextCategory("Casting");
+    CM->Categories.push_back(Casting);
+    ContextCategory* Debug = new ContextCategory("Debug");
+    CM->Categories.push_back(Debug);
+
+    //NODE DEFINITIONS
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) }, 
+        { DataPort(Data::Data_Type::Numeric) }, "Add", NodeMath::Add));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Subtract", NodeMath::Subtract));
+
+    //temporary
+    //Math->Show = true;
+    //Math->Options[0]->Selected = true;
+
+    return CM;
 }

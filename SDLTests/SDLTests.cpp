@@ -18,6 +18,8 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 int IDcount = 0;
 std::vector<Node*> NodeStack;
 std::vector<Link*> LinkStack;
+std::vector<ContextCategory*> CategoryStack;
+std::vector<ContextOption*> OptionStack;
 int gridoffsetX = 300;
 int gridoffsetY = 300;
 int MMoffsetX = 0;
@@ -103,13 +105,7 @@ int main(int argc, char* argv[])
     // connects our texture with dest to control position 
     SDL_QueryTexture(tex, NULL, NULL, &dest.w, &dest.h);
     
-
-    
-
-    // controls annimation loop 
     int close = 0;
-
-    // speed of box 
     int speed = 300;
 
     bool MiddleMouse = false;
@@ -132,6 +128,14 @@ int main(int argc, char* argv[])
     DataPort* currentDragNewPort = nullptr;
     Linkable* currentDragNewPortParent = nullptr;
 
+
+    ContextMenu* RightClickContext = GenerateContextMenu();
+    bool ContextMenuOpen = false;
+    int ContextX, ContextY;
+    CategoryStack = RightClickContext->Categories;
+    for (const auto& value : RightClickContext->Categories) {
+        OptionStack.insert(OptionStack.end(), value->Options.begin(), value->Options.end());
+    }
 
     //Create example node
     std::vector<DataPort> inPorts{  };
@@ -367,13 +371,14 @@ int main(int argc, char* argv[])
                     break;
                 }
             case SDL_MOUSEBUTTONDOWN:
+                int mouseX, mouseY;
+                SDL_GetMouseState(&mouseX, &mouseY);
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT:
                     //std::cout << "Left mouse pressed\n";
-
+                    ContextMenuOpen = false;
                     //hit test
-                    int mouseX, mouseY;
-                    SDL_GetMouseState(&mouseX, &mouseY);
+                    
 
                     //port test
                     for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
@@ -442,6 +447,13 @@ int main(int argc, char* argv[])
                     break;
                 case SDL_BUTTON_RIGHT:
                     //std::cout << "Right mouse pressed\n";
+                    
+                    ContextMenuOpen = !ContextMenuOpen;
+                    if (ContextMenuOpen)
+                    {
+                        ContextX = mouseX;
+                        ContextY = mouseY;
+                    }
                     break;
                 case SDL_BUTTON_MIDDLE:
                     //std::cout << "Middle mouse pressed\n";
@@ -603,6 +615,41 @@ int main(int argc, char* argv[])
 
             renderable->x = renderable->StartX + deltaMouseX / globalScaleFactor;
             renderable->y = renderable->StartY + deltaMouseY / globalScaleFactor;
+        }
+        //context menu hit test
+        if(ContextMenuOpen)
+        {
+            int mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
+
+            bool skipCategoryCheck = false;
+            //check option stack first, then only do a category search if one isnt selected
+            for (const auto& Option : OptionStack) {
+                ContextRenderable* renderable = Option->Renderable;
+                if (mouseX > renderable->x && mouseX < renderable->x + renderable->w && mouseY > renderable->y && mouseY < renderable->y + renderable->h)
+                {
+                    Option->Selected = true;
+                    skipCategoryCheck = true;
+                }
+                else
+                {
+                    Option->Selected = false;
+                }
+            }
+            if (!skipCategoryCheck)
+            {
+                for (const auto& Category : CategoryStack) {
+                    ContextRenderable* renderable = Category->Renderable;
+                    if (mouseX > renderable->x&& mouseX < renderable->x + renderable->w && mouseY > renderable->y&& mouseY < renderable->y + renderable->h)
+                    {
+                        Category->Show = true;
+                    }
+                    else
+                    {
+                        Category->Show = false;
+                    }
+                }
+            }
         }
 
         dest.w = 48 + 32 * zoomLevel;
@@ -818,6 +865,128 @@ int main(int argc, char* argv[])
 
         //Draw Node List FG
         //TBA
+
+        //Draw Context Menu
+        if (ContextMenuOpen)
+        {
+            //std::cout << "drawing context menu";
+            
+            int OptionSize = 20;
+            int OptionMargin = 2;
+            int CategoryCount = RightClickContext->Categories.size();
+
+            int Overallheight = OptionSize * CategoryCount + OptionMargin * (CategoryCount + 1);
+            //Draw main CM background
+            SDL_Rect Background;
+            Background.w = 100;
+            Background.h = Overallheight;
+            Background.x = ContextX;
+            Background.y = ContextY;
+
+            SDL_SetRenderDrawColor(rend, 70, 70, 70, 255);
+            SDL_RenderFillRect(rend, &Background);
+
+            //switch to iterators at some points
+            for (int CategoryIndex = 0; CategoryIndex < CategoryCount; CategoryIndex++)
+            {
+                ContextCategory* CurCategory = RightClickContext->Categories[CategoryIndex];
+                TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", 12); //this opens a font style and sets a size
+                SDL_Color White = { 255, 255, 255 };  // this is the color in rgb format, maxing out all would give you the color white, and it will be your text's color
+
+                
+                CurCategory->Renderable->w = Background.w;
+                CurCategory->Renderable->h = OptionSize + OptionMargin; // add option margin to help selection bounds
+                CurCategory->Renderable->x = Background.x;
+                CurCategory->Renderable->y = Background.y + OptionMargin + (OptionSize + OptionMargin) * CategoryIndex;
+
+                //draw category selected if shown
+                if (CurCategory->Show)
+                {
+                    int CategoryOptionCount = CurCategory->Options.size();
+
+                    SDL_Rect CategoryBackground;
+                    CategoryBackground.w = CurCategory->Renderable->w;
+                    CategoryBackground.h = CurCategory->Renderable->h - OptionMargin;
+                    CategoryBackground.x = CurCategory->Renderable->x;
+                    CategoryBackground.y = CurCategory->Renderable->y;
+
+                    SDL_SetRenderDrawColor(rend, 40, 40, 40, 255);
+                    SDL_RenderFillRect(rend, &CategoryBackground);
+
+                    //Draw Submenu BG
+
+                    int SubmenuHeight = OptionSize * CategoryOptionCount + OptionMargin * (CategoryOptionCount + 1);
+                    SDL_Rect SubmenuBackground;
+                    SubmenuBackground.w = Background.w;
+                    SubmenuBackground.h = SubmenuHeight;
+                    SubmenuBackground.x = Background.x + Background.w;
+                    SubmenuBackground.y = Background.y + (OptionSize + OptionMargin) * CategoryIndex;
+
+                    SDL_SetRenderDrawColor(rend, 70, 70, 70, 255);
+                    SDL_RenderFillRect(rend, &SubmenuBackground);
+
+                    //Draw text and selected bg again
+                    for (int SelectionIndex = 0; SelectionIndex < CategoryOptionCount; SelectionIndex++)
+                    {
+                        ContextOption* CurOption = CurCategory->Options[SelectionIndex];
+
+                        //Setup renderable
+                        CurOption->Renderable->w = SubmenuBackground.w;
+                        CurOption->Renderable->h = OptionSize + OptionMargin;
+                        CurOption->Renderable->x = SubmenuBackground.x;
+                        CurOption->Renderable->y = SubmenuBackground.y + OptionMargin + (OptionSize + OptionMargin) * SelectionIndex;
+
+                        if (CurOption->Selected)
+                        {
+                            //draw selection bg
+                            SDL_Rect OptionBackground;
+                            OptionBackground.w = CurOption->Renderable->w;
+                            OptionBackground.h = CurOption->Renderable->h - OptionMargin;
+                            OptionBackground.x = CurOption->Renderable->x;
+                            OptionBackground.y = CurOption->Renderable->y;
+
+                            SDL_SetRenderDrawColor(rend, 40, 40, 40, 255);
+                            SDL_RenderFillRect(rend, &OptionBackground);
+                        }
+
+                        const char* Selectiontext = CurOption->Name;
+                        SDL_Surface* SelectionsurfMessage = TTF_RenderText_Solid(Sans, Selectiontext, White);
+                        SDL_Texture* SelectionMessage = SDL_CreateTextureFromSurface(rend, SelectionsurfMessage);
+
+                        SDL_Rect SelectionMessage_rect;
+                        SelectionMessage_rect.x = SubmenuBackground.x;
+                        SelectionMessage_rect.y = SubmenuBackground.y + OptionMargin + (OptionSize + OptionMargin) * SelectionIndex;
+
+                        TTF_SizeText(Sans, Selectiontext, &SelectionMessage_rect.w, &SelectionMessage_rect.h);
+
+                        SDL_RenderCopy(rend, SelectionMessage, NULL, &SelectionMessage_rect);
+
+                        SDL_DestroyTexture(SelectionMessage);
+                        SDL_FreeSurface(SelectionsurfMessage);
+
+                    }
+                }
+                //draw category text
+                
+
+                const char* text = CurCategory->CategoryName;
+                SDL_Surface* nodeMessage = TTF_RenderText_Solid(Sans, text, White);
+                SDL_Texture* Message = SDL_CreateTextureFromSurface(rend, nodeMessage);
+
+                SDL_Rect Message_rect;
+                Message_rect.x = Background.x;
+                Message_rect.y = Background.y + OptionMargin + (OptionSize + OptionMargin) * CategoryIndex;
+
+                TTF_SizeText(Sans, text, &Message_rect.w, &Message_rect.h);
+
+                SDL_RenderCopy(rend, Message, NULL, &Message_rect);
+
+                SDL_DestroyTexture(Message);
+                SDL_FreeSurface(nodeMessage);
+                TTF_CloseFont(Sans);
+
+            }
+        }
 
 
         //End Draw
