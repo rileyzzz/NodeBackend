@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include "Node.h"
+class ContextOption;
+class ContextCategory;
 //basic data definition for how categories work - a context menu should be declared once and then referenced on right click etc
 class ContextRenderable
 {
@@ -20,6 +22,7 @@ public:
 	const char* Name;
 	ContextRenderable* Renderable;
 	bool Selected;
+	ContextCategory* Parent;
 };
 
 class NodeCreator : public ContextOption
@@ -33,7 +36,7 @@ public:
 
 	typedef bool (*Action)(std::vector<Data*>);
 	Action nodeAction;
-	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, Data* (*f)(std::vector<Data*>) = nullptr)
+	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, ContextCategory* inParent, Data* (*f)(std::vector<Data*>) = nullptr)
 	{
 		Type = Option_Type::CreateNode;
 		NodeType = inType;
@@ -41,13 +44,14 @@ public:
 		outPorts = outputs;
 		Name = inName;
 		Selected = false;
+		Parent = inParent;
 		Renderable = new ContextRenderable();
 		if (f)
 		{
 			Function = f;
 		}
 	}
-	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, bool (*f)(std::vector<Data*>) = nullptr)
+	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, ContextCategory* inParent, bool (*f)(std::vector<Data*>) = nullptr)
 	{
 		Type = Option_Type::CreateNode;
 		NodeType = inType;
@@ -55,6 +59,7 @@ public:
 		outPorts = outputs;
 		Name = inName;
 		Selected = false;
+		Parent = inParent;
 		Renderable = new ContextRenderable();
 		if (f)
 		{

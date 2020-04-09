@@ -78,19 +78,19 @@ int main(int argc, char* argv[])
         printf("error initializing SDL: %s\n", SDL_GetError());
     }
 
-    int scrw = 1920;
-    int scrh = 1080;
-    SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        scrw, scrh, 0);
-
-    //int scrw = 3840;
-    //int scrh = 2160;
+    //int scrw = 1920;
+    //int scrh = 1080;
     //SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
     //    SDL_WINDOWPOS_CENTERED,
     //    SDL_WINDOWPOS_CENTERED,
-    //    scrw, scrh, SDL_WINDOW_FULLSCREEN);
+    //    scrw, scrh, 0);
+
+    int scrw = 3840;
+    int scrh = 2160;
+    SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        scrw, scrh, SDL_WINDOW_FULLSCREEN);
 
     // triggers the program that controls 
     // your graphics hardware and sets flags 
@@ -739,17 +739,22 @@ int main(int argc, char* argv[])
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
 
+            
             bool skipCategoryCheck = false;
             //check option stack first, then only do a category search if one isnt selected
             for (const auto& Option : OptionStack) {
                 ContextRenderable* renderable = Option->Renderable;
-                if (mouseX > renderable->x && mouseX < renderable->x + renderable->w && mouseY > renderable->y && mouseY < renderable->y + renderable->h)
+                if (Option->Parent->Show && mouseX > renderable->x && mouseX < renderable->x + renderable->w && mouseY > renderable->y && mouseY < renderable->y + renderable->h)
                 {
                     for (const auto& otherOption : OptionStack) {
                         otherOption->Selected = false;
                     }
                     Option->Selected = true;
                     skipCategoryCheck = true;
+                    //for (const auto& Category : CategoryStack) {
+                    //    Category->Show = false;
+                    //}
+                    //Option->Parent->Show = true;
                 }
                 else
                 {
@@ -758,15 +763,22 @@ int main(int argc, char* argv[])
             }
             if (!skipCategoryCheck)
             {
+                int CategoryRightTolerance = 4;
                 for (const auto& Category : CategoryStack) {
                     ContextRenderable* renderable = Category->Renderable;
-                    if (mouseX > renderable->x&& mouseX < renderable->x + renderable->w && mouseY > renderable->y&& mouseY < renderable->y + renderable->h)
+                    if (mouseX > renderable->x && mouseX < renderable->x + renderable->w + CategoryRightTolerance && mouseY > renderable->y&& mouseY < renderable->y + renderable->h)
                     {
+                        //for (const auto& otherCategory : CategoryStack) {
+                        //    otherCategory->Show = false;
+                        //}
                         Category->Show = true;
                     }
                     else
                     {
                         Category->Show = false;
+                        //for (const auto& otherOption : Category->Options) {
+                        //    otherOption->Selected = false;
+                        //}
                     }
                 }
             }
@@ -1081,7 +1093,7 @@ int main(int argc, char* argv[])
             SDL_SetRenderDrawColor(rend, 70, 70, 70, 255);
             SDL_RenderFillRect(rend, &Background);
 
-            //switch to iterators at some points
+            //switch to iterators at some point
             for (int CategoryIndex = 0; CategoryIndex < CategoryCount; CategoryIndex++)
             {
                 ContextCategory* CurCategory = RightClickContext->Categories[CategoryIndex];
@@ -1090,9 +1102,9 @@ int main(int argc, char* argv[])
                 int TextMargin = 2;
                 
                 CurCategory->Renderable->w = Background.w;
-                CurCategory->Renderable->h = OptionSize + OptionMargin; // add option margin to help selection bounds
+                CurCategory->Renderable->h = OptionSize + OptionMargin * 2; // add option margin to help selection bounds
                 CurCategory->Renderable->x = Background.x;
-                CurCategory->Renderable->y = Background.y + OptionMargin + (OptionSize + OptionMargin) * CategoryIndex;
+                CurCategory->Renderable->y = Background.y + (OptionSize + OptionMargin) * CategoryIndex;
 
                 //draw category selected if shown
                 if (CurCategory->Show)
@@ -1127,9 +1139,9 @@ int main(int argc, char* argv[])
 
                         //Setup renderable
                         CurOption->Renderable->w = SubmenuBackground.w;
-                        CurOption->Renderable->h = OptionSize + OptionMargin;
+                        CurOption->Renderable->h = OptionSize + OptionMargin * 2;
                         CurOption->Renderable->x = SubmenuBackground.x;
-                        CurOption->Renderable->y = SubmenuBackground.y + OptionMargin + (OptionSize + OptionMargin) * SelectionIndex;
+                        CurOption->Renderable->y = SubmenuBackground.y + (OptionSize + OptionMargin) * SelectionIndex;
 
                         if (CurOption->Selected)
                         {

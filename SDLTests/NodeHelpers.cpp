@@ -123,69 +123,69 @@ ContextMenu* GenerateContextMenu()
     //Math
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) }, 
-        { DataPort(Data::Data_Type::Numeric) }, "Add", NodeMath::Add));
+        { DataPort(Data::Data_Type::Numeric) }, "Add", Math, NodeMath::Add));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) },
-        { DataPort(Data::Data_Type::Numeric) }, "Subtract", NodeMath::Subtract));
+        { DataPort(Data::Data_Type::Numeric) }, "Subtract", Math, NodeMath::Subtract));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) },
-        { DataPort(Data::Data_Type::Numeric) }, "Multiply", NodeMath::Multiply));
+        { DataPort(Data::Data_Type::Numeric) }, "Multiply", Math, NodeMath::Multiply));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) },
-        { DataPort(Data::Data_Type::Numeric) }, "Divide", NodeMath::Divide));
+        { DataPort(Data::Data_Type::Numeric) }, "Divide", Math, NodeMath::Divide));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Integer), DataPort(Data::Data_Type::Integer) },
-        { DataPort(Data::Data_Type::Integer) }, "Modulo", NodeMath::Mod));
+        { DataPort(Data::Data_Type::Integer) }, "Modulo", Math, NodeMath::Mod));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) },
-        { DataPort(Data::Data_Type::Numeric) }, "Pow", NodeMath::Pow));
+        { DataPort(Data::Data_Type::Numeric) }, "Pow", Math, NodeMath::Pow));
 
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric) },
-        { DataPort(Data::Data_Type::Numeric) }, "Abs", NodeMath::Abs));
+        { DataPort(Data::Data_Type::Numeric) }, "Abs", Math, NodeMath::Abs));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric) },
-        { DataPort(Data::Data_Type::Numeric) }, "Square Root", NodeMath::Sqrt));
+        { DataPort(Data::Data_Type::Numeric) }, "Square Root", Math, NodeMath::Sqrt));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric) },
-        { DataPort(Data::Data_Type::Numeric) }, "Round", NodeMath::Round));
+        { DataPort(Data::Data_Type::Numeric) }, "Round", Math, NodeMath::Round));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric) },
-        { DataPort(Data::Data_Type::Numeric) }, "Floor", NodeMath::Floor));
+        { DataPort(Data::Data_Type::Numeric) }, "Floor", Math, NodeMath::Floor));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric) },
-        { DataPort(Data::Data_Type::Numeric) }, "Ceil", NodeMath::Ceil));
+        { DataPort(Data::Data_Type::Numeric) }, "Ceil", Math, NodeMath::Ceil));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric) },
-        { DataPort(Data::Data_Type::Numeric) }, "Log", NodeMath::Log));
+        { DataPort(Data::Data_Type::Numeric) }, "Log", Math, NodeMath::Log));
 
     //Comparison
     Comparison->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Boolean), DataPort(Data::Data_Type::Boolean) },
-        { DataPort(Data::Data_Type::Boolean) }, "And", NodeComparison::And));
+        { DataPort(Data::Data_Type::Boolean) }, "And", Comparison, NodeComparison::And));
     Comparison->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Boolean), DataPort(Data::Data_Type::Boolean) },
-        { DataPort(Data::Data_Type::Boolean) }, "Or", NodeComparison::Or));
+        { DataPort(Data::Data_Type::Boolean) }, "Or", Comparison, NodeComparison::Or));
 
     Comparison->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Boolean) },
-        { DataPort(Data::Data_Type::Boolean) }, "Not", NodeComparison::Not));
+        { DataPort(Data::Data_Type::Boolean) }, "Not", Comparison, NodeComparison::Not));
 
     //Casting
     Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Boolean) },
-        { DataPort(Data::Data_Type::Integer) }, "Bool to Int", NodeCast::BooltoInt));
+        { DataPort(Data::Data_Type::Integer) }, "Bool to Int", Casting, NodeCast::BooltoInt));
     Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Integer) },
-        { DataPort(Data::Data_Type::Boolean) }, "Int to Bool", NodeCast::InttoBool));
+        { DataPort(Data::Data_Type::Boolean) }, "Int to Bool", Casting, NodeCast::InttoBool));
     Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Integer) },
-        { DataPort(Data::Data_Type::Float) }, "Int to Float", NodeCast::InttoFloat));
+        { DataPort(Data::Data_Type::Float) }, "Int to Float", Casting, NodeCast::InttoFloat));
 
     //Debug
     Debug->Options.push_back(new NodeCreator(Node::Node_Type::Node_Action,
         { DataPort(Data::Data_Type::String) },
-        {  }, "Print", NodeDebug::Print));
+        {  }, "Print", Debug, NodeDebug::Print));
 
     //temporary
     //Math->Show = true;
