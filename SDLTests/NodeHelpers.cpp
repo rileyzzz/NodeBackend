@@ -117,12 +117,29 @@ ContextMenu* GenerateContextMenu()
     CM->Categories.push_back(Debug);
 
     //NODE DEFINITIONS
+
+    //Math
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) }, 
         { DataPort(Data::Data_Type::Numeric) }, "Add", NodeMath::Add));
     Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) },
         { DataPort(Data::Data_Type::Numeric) }, "Subtract", NodeMath::Subtract));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Multiply", NodeMath::Multiply));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Numeric), DataPort(Data::Data_Type::Numeric) },
+        { DataPort(Data::Data_Type::Numeric) }, "Divide", NodeMath::Divide));
+    Math->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Integer), DataPort(Data::Data_Type::Integer) },
+        { DataPort(Data::Data_Type::Integer) }, "Modulo", NodeMath::Mod));
+
+
+    //Debug
+    Debug->Options.push_back(new NodeCreator(Node::Node_Type::Node_Action,
+        { DataPort(Data::Data_Type::String) },
+        {  }, "Print", NodeDebug::Print));
 
     //temporary
     //Math->Show = true;

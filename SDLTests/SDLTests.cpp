@@ -57,6 +57,13 @@ void GetScreenCoordinates(int x, int y, int* sendX, int* sendY)
     *sendY = (gridoffsetY + MMoffsetY) + y * globalScaleFactor;
 }
 
+void GetGridCoordinates(int x, int y, int* sendX, int* sendY)
+{
+    //int returnarr[2];
+    *sendX = (x - (gridoffsetX + MMoffsetX)) / globalScaleFactor;
+    *sendY = (y - (gridoffsetY + MMoffsetY)) / globalScaleFactor;
+}
+
 int main(int argc, char* argv[])
 {
     std::cout << "Starting SDL2\n";
@@ -375,10 +382,54 @@ int main(int argc, char* argv[])
                 SDL_GetMouseState(&mouseX, &mouseY);
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT:
+                {
                     //std::cout << "Left mouse pressed\n";
-                    ContextMenuOpen = false;
+                    bool nodeCreated = false;
+                    //Check for any selected context menu options
+                    if (ContextMenuOpen)
+                    {
+                        for (const auto& Option : OptionStack) {
+                            if (Option->Selected)
+                            {
+                                //A node has been selected for creation
+                                nodeCreated = true;
+                                switch (Option->Type)
+                                {
+                                case ContextOption::Option_Type::CreateNode:
+                                {
+                                    //downcast the option to a NodeCreator
+                                    NodeCreator* NodeConstructor = (NodeCreator*)Option;
+
+                                    //get node grid position
+                                    int NewNodeX, NewNodeY;
+                                    GetGridCoordinates(mouseX, mouseY, &NewNodeX, &NewNodeY);
+
+                                    //create the node
+                                    std::vector<Input*> NewInputs = CreateInputs(NodeConstructor->inPorts);
+                                    std::vector<Output*> NewOutputs = CreateOutputs(NodeConstructor->outPorts);
+                                    Node* NewNode;
+                                    switch (NodeConstructor->NodeType)
+                                    {
+                                    case Node::Node_Type::Node_Calculation:
+                                        NewNode = CreateNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, NewNodeX, NewNodeY, NodeConstructor->Function);
+                                        break;
+                                    case Node::Node_Type::Node_Action:
+                                        NewNode = CreateActionNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, NewNodeX, NewNodeY, NodeConstructor->nodeAction);
+                                        break;
+                                    }
+                                    break;
+                                }
+                                case ContextOption::Option_Type::UI:
+                                    //UI functions currently unimplemented
+                                    break;
+                                }
+                            }
+                        }
+                        ContextMenuOpen = false;
+                    }
+                    //break here - we don't want any hit tests if a node was created
+                    if (nodeCreated) break;
                     //hit test
-                    
 
                     //port test
                     for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
@@ -426,10 +477,10 @@ int main(int argc, char* argv[])
                     {
                         Node* checkNode = NodeStack[Nodecount];
                         NodeDrawable* renderable = checkNode->renderable;
-                        
-                        if (mouseX > renderable->renderX && mouseX < renderable->renderX + renderable->width * globalScaleFactor)
+
+                        if (mouseX > renderable->renderX&& mouseX < renderable->renderX + renderable->width * globalScaleFactor)
                         {
-                            if (mouseY > renderable->renderY && mouseY < renderable->renderY + renderable->currentHeight)
+                            if (mouseY > renderable->renderY&& mouseY < renderable->renderY + renderable->currentHeight)
                             {
                                 //std::cout << "clicked a node!";
                                 renderable->mouseStartX = mouseX;
@@ -439,12 +490,13 @@ int main(int argc, char* argv[])
 
                                 currentDrag = checkNode;
                                 draggingNode = true;
-                                
+
                             }
                         }
                     }
 
                     break;
+                } 
                 case SDL_BUTTON_RIGHT:
                     //std::cout << "Right mouse pressed\n";
                     
@@ -516,7 +568,6 @@ int main(int argc, char* argv[])
                                                 LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), checkNode->inputs[Portcount]->currentLink), LinkStack.end());
                                                 Unlink(checkNode->inputs[Portcount]->currentLink);
                                             }
-
                                             LinkStack.push_back(new Link(other, checkNode->inputs[Portcount]));
                                         }
                                     }

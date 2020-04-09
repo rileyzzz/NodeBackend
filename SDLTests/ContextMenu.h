@@ -30,6 +30,9 @@ public:
 	Node::Node_Type NodeType;
 	typedef Data* (*MyFunction)(std::vector<Data*>);
 	MyFunction Function;
+
+	typedef bool (*Action)(std::vector<Data*>);
+	Action nodeAction;
 	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, Data* (*f)(std::vector<Data*>) = nullptr)
 	{
 		Type = Option_Type::CreateNode;
@@ -42,6 +45,20 @@ public:
 		if (f)
 		{
 			Function = f;
+		}
+	}
+	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, bool (*f)(std::vector<Data*>) = nullptr)
+	{
+		Type = Option_Type::CreateNode;
+		NodeType = inType;
+		inPorts = inputs;
+		outPorts = outputs;
+		Name = inName;
+		Selected = false;
+		Renderable = new ContextRenderable();
+		if (f)
+		{
+			nodeAction = f;
 		}
 	}
 };
