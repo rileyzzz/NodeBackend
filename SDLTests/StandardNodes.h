@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Node.h"
+#include <deque>
 
 //Math
 class NodeMath
@@ -80,9 +81,9 @@ class NodeDebug
 {
 public:
 	static bool Print(std::vector<Data*> Inputs);
-	static std::vector<ConsoleMessage> console;
+	static std::deque<ConsoleMessage> console;
 	static void PrinttoScreen(ConsoleMessage text);
-	static void MessageThread(int MessageIndex, int waitTime);
+	static void MessageThread(ConsoleMessage text, int MessageIndex, int waitTime);
 };
 
 class NodeInput

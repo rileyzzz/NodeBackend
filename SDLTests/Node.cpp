@@ -6,9 +6,8 @@ Data* Node::CalculateInputs()
     //CalculatedInputs.clear();
     std::vector<Data*> sendInputs;
     //Loop through every input required for our output node.
-    for (int nodeInputID = 0; nodeInputID < inputs.size(); nodeInputID++)
+    for (auto& nodeInput : inputs) 
     {
-        Input* nodeInput = inputs[nodeInputID];
 
         //Recursion through entire link tree.
         if (nodeInput->link)

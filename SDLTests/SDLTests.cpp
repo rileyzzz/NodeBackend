@@ -559,7 +559,6 @@ int main(int argc, char* argv[])
                                     //make sure it's already linked
                                     if (checkNodeCast->Previous)
                                     {
-                                        std::cout << "this is working";
                                         currentDragFlow = Curport;
                                         //currentDragPortParent = checkNode->inputs[Portcount];
                                         draggingFlow = true;
@@ -576,6 +575,8 @@ int main(int argc, char* argv[])
                                 {
                                     currentDragNewFlow = Curport;
                                     //currentDragNewPortParent = checkNode->outputs[Portcount];
+                                    //erase pre existing flow
+                                    
                                     draggingNewFlow = true;
                                 }
                             }
@@ -833,6 +834,17 @@ int main(int argc, char* argv[])
                         currentDragPort->offsetY = 0;
                     }
                     
+                    if (currentDragFlow && !HitFlow)
+                    {
+                        ActionNode* orig = (ActionNode*)currentDragFlow->parent;
+                        ActionNode* from = orig->Previous;
+                        if(orig && from) UnlinkActionNodes(from, orig);
+                    }
+                    if (currentDragFlow)
+                    {
+                        currentDragFlow->offsetX = 0;
+                        currentDragFlow->offsetY = 0;
+                    }
 
                     draggingNode = false;
                     //currentDrag.clear();
@@ -875,6 +887,9 @@ int main(int argc, char* argv[])
                 break;
             }
         }
+
+        EventExampleNode->Run();
+
 
         if (MiddleMouse)
         {
@@ -1459,7 +1474,9 @@ int main(int argc, char* argv[])
         for (int lineIndex = 0; lineIndex < NodeDebug::console.size(); lineIndex++)
         {
             int ConsoleTop = scrh - NodeDebug::console.size() * LineSize;
-            const char* text = NodeDebug::console[lineIndex].message;
+            std::string lineText = "";
+            if (&NodeDebug::console[lineIndex] != nullptr) lineText = NodeDebug::console[lineIndex].message;
+            const char* text = lineText.c_str();
             SDL_Surface* ConsolesurfMessage = TTF_RenderText_Solid(ConsoleFont, text, White);
             SDL_Texture* ConsoleMessage = SDL_CreateTextureFromSurface(rend, ConsolesurfMessage);
 
