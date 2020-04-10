@@ -197,31 +197,27 @@ Data* NodeCast::InttoFloat(std::vector<Data*> Inputs)
 std::deque<ConsoleMessage> NodeDebug::console;
 
 
-void NodeDebug::MessageThread(ConsoleMessage text, int MessageIndex, int waitTime)
+void NodeDebug::MessageThread(int waitTime, int messageindex)
 {
-    console.push_back(text);
     std::this_thread::sleep_for(std::chrono::seconds(waitTime));
-    if (!console.empty())
+
+    if (messageindex = console.size() - 1)
     {
-        console.pop_front();
+        console.clear();
     }
 }
 
-
-void NodeDebug::PrinttoScreen(ConsoleMessage text)
-{
-    std::thread t(MessageThread, text, console.size() - 1, text.messageLength);
-    t.detach();
-}
 bool NodeDebug::Print(std::vector<Data*> Inputs)
 {
     NodeString* input = (NodeString*)Inputs[0];
     //std::cout << input->value << "\n";
     ConsoleMessage NewMessage;
     NewMessage.message = input->value;
-    NewMessage.messageLength = 1;
+    NewMessage.messageLength = 2;
 
-    PrinttoScreen(NewMessage);
+    console.push_front(NewMessage);
+    std::thread t(MessageThread, NewMessage.messageLength, console.size() - 1);
+    t.detach();
     return true;
 }
 

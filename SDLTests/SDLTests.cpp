@@ -1469,9 +1469,10 @@ int main(int argc, char* argv[])
         SDL_Color White = { 255, 255, 255 };
         int ConsoleLeftMargin = 4;
         int LineSize = 30;
-        for (int lineIndex = 0; lineIndex < NodeDebug::console.size(); lineIndex++)
+        size_t MaxLines = 6;
+        for (int lineIndex = 0; lineIndex < std::min(NodeDebug::console.size(), MaxLines); lineIndex++)
         {
-            int ConsoleTop = scrh - NodeDebug::console.size() * LineSize;
+            //int ConsoleTop = scrh - NodeDebug::console.size() * LineSize;
             std::string lineText = "";
             if (&NodeDebug::console[lineIndex] != nullptr) lineText = NodeDebug::console[lineIndex].message;
             const char* text = lineText.c_str();
@@ -1480,7 +1481,7 @@ int main(int argc, char* argv[])
 
             SDL_Rect ConsoleMessage_rect;
             ConsoleMessage_rect.x = ConsoleLeftMargin;
-            ConsoleMessage_rect.y = ConsoleTop + lineIndex * LineSize;
+            ConsoleMessage_rect.y = scrh - LineSize - lineIndex * LineSize;
 
             TTF_SizeText(ConsoleFont, text, &ConsoleMessage_rect.w, &ConsoleMessage_rect.h);
 

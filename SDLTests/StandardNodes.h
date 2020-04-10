@@ -82,8 +82,7 @@ class NodeDebug
 public:
 	static bool Print(std::vector<Data*> Inputs);
 	static std::deque<ConsoleMessage> console;
-	static void PrinttoScreen(ConsoleMessage text);
-	static void MessageThread(ConsoleMessage text, int MessageIndex, int waitTime);
+	static void MessageThread(int waitTime, int messageindex);
 };
 
 class NodeInput
