@@ -46,6 +46,15 @@ DataNode* CreateInputNode(Node::Node_Type type, std::vector<Input*> inputs, std:
     NodeStack.push_back(NewNode);
     return NewNode;
 }
+
+DataNode* CreateWeirdInput(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, std::function<Data * ()> f, int x = 0, int y = 0)
+{
+    DataNode* NewNode = new DataNode(IDcount, type, inputs, outputs, title, f, x, y);
+    IDcount++;
+    NodeStack.push_back(NewNode);
+    return NewNode;
+}
+
 static void DestroyNode(Node* node)
 {
     NodeStack.erase(std::remove(NodeStack.begin(), NodeStack.end(), node), NodeStack.end());
@@ -484,7 +493,14 @@ int main(int argc, char* argv[])
                                         NewNode = CreateActionNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, ActionNode::ActionType::DoubleSided, NewNodeX, NewNodeY, NodeConstructor->nodeAction);
                                         break;
                                     case Node::Node_Type::Node_Input:
-                                        NewNode = CreateInputNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, NewNodeX, NewNodeY, NodeConstructor->nodeInput);
+                                        if (!NodeConstructor->weird)
+                                        {
+                                            NewNode = CreateInputNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, NewNodeX, NewNodeY, NodeConstructor->nodeInput);
+                                        }
+                                        else
+                                        {
+                                            NewNode = CreateWeirdInput(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, NodeConstructor->altInput, NewNodeX, NewNodeY);
+                                        }
                                         break;
                                     }
                                     break;

@@ -1,5 +1,6 @@
 #include "NodeHelpers.h"
 #include "StandardNodes.h"
+#include <cstdarg>
 
 
 std::vector<Input*> CreateInputs(std::vector<DataPort> itemarray)
@@ -36,9 +37,13 @@ Data* CalculateLinkChain(Output* srcLink)
             {
                 returnval = ParentNode->InputData;
             }
-            else
+            else if(ParentNode->InputCalculate)
             {
                 returnval = ParentNode->InputCalculate();
+            }
+            else if (ParentNode->weirdCalculate)
+            {
+                returnval = ParentNode->weirdCalculate();
             }
             
             break;
@@ -126,6 +131,19 @@ Data* GetNodeDefault(Data::Data_Type intype)
     }
 }
 
+
+//Data* CreateData(bool input)
+//{
+//    return new NodeBoolean(input);
+//}
+
+
+double TestFunction()
+{
+    return 12;
+}
+
+
 ContextMenu* GenerateContextMenu()
 {
     ContextMenu* CM = new ContextMenu();
@@ -142,6 +160,9 @@ ContextMenu* GenerateContextMenu()
     CM->Categories.push_back(Debug);
     ContextCategory* CInput = new ContextCategory("Input");
     CM->Categories.push_back(CInput);
+
+    ContextCategory* CSTD = new ContextCategory("Custom");
+    CM->Categories.push_back(CSTD);
     //NODE DEFINITIONS
 
     //Math
@@ -229,6 +250,10 @@ ContextMenu* GenerateContextMenu()
         { DataPort(Data::Data_Type::Integer) },
         { DataPort(Data::Data_Type::Float) }, "Int to Float", Casting, NodeCast::InttoFloat));
 
+    Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Weird) },
+        { DataPort(Data::Data_Type::Float) }, "Weird to Float", Casting, NodeCast::WeirdtoFloat));
+
     //Debug
     Debug->Options.push_back(new NodeCreator(Node::Node_Type::Node_Action,
         { DataPort(Data::Data_Type::String) },
@@ -239,7 +264,7 @@ ContextMenu* GenerateContextMenu()
         {  },
         { DataPort(Data::Data_Type::Float) }, "Time", CInput, NodeInput::Time));
 
-    
+    AddCustomEmptyCalculation(CSTD, "test", TestFunction);
 
     return CM;
 }

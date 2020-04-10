@@ -68,11 +68,12 @@ public:
 	}
 };
 
+template <class T>
 class NodeWeird : public Data
 {
 public:
-	void* value;
-	NodeWeird(void* input)
+	T value;
+	NodeWeird(T input)
 	{
 		value = input;
 		type = Data_Type::Weird;

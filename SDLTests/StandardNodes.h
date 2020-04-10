@@ -69,6 +69,8 @@ public:
 	static Data* InttoBool(std::vector<Data*> Inputs);
 
 	static Data* InttoFloat(std::vector<Data*> Inputs);
+
+	static Data* WeirdtoFloat(std::vector<Data*> Inputs);
 };
 
 //Debug

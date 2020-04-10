@@ -3,6 +3,7 @@
 #include "DataType.h"
 #include "NodeDrawable.h"
 #include <iostream>
+#include <functional>
 class Input;
 class Output;
 class Node;
@@ -78,6 +79,9 @@ class Node
 		//Should this be an input node, have a variable for the input data that can be changed on the fly. This should probably be moved to a subclass at some point
 		Data* InputData;
 
+
+		std::function<Data * ()> weirdCalculate;
+
 		typedef Data* (*InputFunc)();
 
 		InputFunc InputCalculate;
@@ -85,6 +89,7 @@ class Node
 		typedef Data* (*CalcFunc)(std::vector<Data*>);
 
 		CalcFunc Calculate;
+
 
 		Data* CalculateInputs();
 };
@@ -152,6 +157,38 @@ public:
 		{
 			InputCalculate = (*f);
 		}
+
+		title = givenTitle;
+		renderable = new NodeDrawable();
+		renderable->x = x;
+		renderable->y = y;
+		Selected = false;
+		//std::cout << "Created node " << title << ".\n";
+	}
+	DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, std::function<Data * ()> f, int x = 0, int y = 0)
+	{
+		ID = givenID;
+		type = givenType;
+		inputs = givenInputs;
+		outputs = givenOutputs;
+		//set IO parents
+		if (inputs.size())
+		{
+			for (int iter = 0; iter < inputs.size(); iter++)
+			{
+				inputs[iter]->ParentNode = this;
+			}
+		}
+		if (outputs.size())
+		{
+			for (int iter = 0; iter < outputs.size(); iter++)
+			{
+				outputs[iter]->ParentNode = this;
+			}
+		}
+
+		weirdCalculate = f;
+
 
 		title = givenTitle;
 		renderable = new NodeDrawable();

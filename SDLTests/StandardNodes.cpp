@@ -192,6 +192,13 @@ Data* NodeCast::InttoFloat(std::vector<Data*> Inputs)
     return new NodeFloat(input1->value);
 }
 
+
+Data* NodeCast::WeirdtoFloat(std::vector<Data*> Inputs)
+{
+    NodeFloat* input1 = (NodeFloat*)Inputs[0];
+    return new NodeFloat(input1->value);
+}
+
 //Actions ========================================
 
 //Debug
