@@ -1465,30 +1465,38 @@ int main(int argc, char* argv[])
         }
 
         //Draw Console
-        TTF_Font* ConsoleFont = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/consola.ttf", 24);
+        TTF_Font* ConsoleFont = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/consola.ttf", 16);
         SDL_Color White = { 255, 255, 255 };
         int ConsoleLeftMargin = 4;
         int LineSize = 30;
-        size_t MaxLines = 6;
-        for (int lineIndex = 0; lineIndex < std::min(NodeDebug::console.size(), MaxLines); lineIndex++)
+        size_t MaxLines = 18;
+        std::deque<ConsoleMessage> tempconsole = NodeDebug::console;
+        for (int lineIndex = 0; lineIndex < std::min(tempconsole.size(), MaxLines); lineIndex++)
         {
             //int ConsoleTop = scrh - NodeDebug::console.size() * LineSize;
-            std::string lineText = "";
-            if (&NodeDebug::console[lineIndex] != nullptr) lineText = NodeDebug::console[lineIndex].message;
-            const char* text = lineText.c_str();
-            SDL_Surface* ConsolesurfMessage = TTF_RenderText_Solid(ConsoleFont, text, White);
-            SDL_Texture* ConsoleMessage = SDL_CreateTextureFromSurface(rend, ConsolesurfMessage);
+            //std::string lineText = "";
+            if (tempconsole[lineIndex].message != nullptr)
+            {
+                std::string text = tempconsole[lineIndex].message;
+                const char* convert = text.c_str();
+                SDL_Surface* ConsolesurfMessage = TTF_RenderText_Solid(ConsoleFont, convert, White);
+                SDL_Texture* ConsoleMessage = SDL_CreateTextureFromSurface(rend, ConsolesurfMessage);
 
-            SDL_Rect ConsoleMessage_rect;
-            ConsoleMessage_rect.x = ConsoleLeftMargin;
-            ConsoleMessage_rect.y = scrh - LineSize - lineIndex * LineSize;
+                SDL_Rect ConsoleMessage_rect;
+                ConsoleMessage_rect.x = ConsoleLeftMargin;
+                ConsoleMessage_rect.y = scrh - LineSize - lineIndex * LineSize;
 
-            TTF_SizeText(ConsoleFont, text, &ConsoleMessage_rect.w, &ConsoleMessage_rect.h);
+                TTF_SizeText(ConsoleFont, convert, &ConsoleMessage_rect.w, &ConsoleMessage_rect.h);
 
-            SDL_RenderCopy(rend, ConsoleMessage, NULL, &ConsoleMessage_rect);
+                SDL_RenderCopy(rend, ConsoleMessage, NULL, &ConsoleMessage_rect);
 
-            SDL_DestroyTexture(ConsoleMessage);
-            SDL_FreeSurface(ConsolesurfMessage);
+                SDL_DestroyTexture(ConsoleMessage);
+                SDL_FreeSurface(ConsolesurfMessage);
+                
+                
+            }
+            //const char* text = lineText.c_str();
+            
         }
 
         TTF_CloseFont(ConsoleFont);

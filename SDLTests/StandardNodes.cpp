@@ -2,6 +2,7 @@
 #include <math.h>
 #include "NodeHelpers.h"
 #include <thread>
+#include <algorithm>
 
 //Calculations ========================================
 
@@ -197,27 +198,36 @@ Data* NodeCast::InttoFloat(std::vector<Data*> Inputs)
 std::deque<ConsoleMessage> NodeDebug::console;
 
 
-void NodeDebug::MessageThread(int waitTime, int messageindex)
+void NodeDebug::MessageThread(NodeString* input)
 {
-    std::this_thread::sleep_for(std::chrono::seconds(waitTime));
+    ConsoleMessage NewMessage;
+    NewMessage.message = input->value;
+    NewMessage.messageLength = 2;
 
-    if (messageindex = console.size() - 1)
-    {
-        console.clear();
-    }
+    console.push_front(NewMessage);
+
+    std::this_thread::sleep_for(std::chrono::seconds(NewMessage.messageLength));
+
+
 }
 
 bool NodeDebug::Print(std::vector<Data*> Inputs)
 {
     NodeString* input = (NodeString*)Inputs[0];
     //std::cout << input->value << "\n";
+
     ConsoleMessage NewMessage;
     NewMessage.message = input->value;
     NewMessage.messageLength = 2;
 
     console.push_front(NewMessage);
-    std::thread t(MessageThread, NewMessage.messageLength, console.size() - 1);
-    t.detach();
+
+    
+
+    //std::thread t(MessageThread, input);
+    //t.detach();
+
+
     return true;
 }
 
