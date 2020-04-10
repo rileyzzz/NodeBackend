@@ -73,6 +73,10 @@ public:
 	static Data* WeirdtoFloat(std::vector<Data*> Inputs);
 
 	static Data* FloattoWeird(std::vector<Data*> Inputs);
+
+	static Data* WeirdtoString(std::vector<Data*> Inputs);
+
+	static Data* StringtoWeird(std::vector<Data*> Inputs);
 };
 
 //Debug

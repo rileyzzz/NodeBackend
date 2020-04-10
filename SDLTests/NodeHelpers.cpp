@@ -2,6 +2,7 @@
 #include "StandardNodes.h"
 
 
+
 std::vector<Input*> CreateInputs(std::vector<DataPort> itemarray)
 {
     std::vector<Input*> createdInputs;
@@ -119,17 +120,17 @@ Data* GetNodeDefault(Data::Data_Type intype)
         return new NodeBoolean(false);
         break;
     case Data::Data_Type::Integer:
-        return new NodeInteger(0.0);
+        return new NodeInteger(0);
         break;
     case Data::Data_Type::Numeric:
     case Data::Data_Type::Float:
-        return new NodeFloat(0.0);
+        return new NodeFloat(0);
         break;
     case Data::Data_Type::String:
         return new NodeString("");
         break;
     case Data::Data_Type::Weird:
-        return new NodeNone();
+        return new NodeFloat(0);
         break;
     default:
         return new NodeNone();
@@ -147,10 +148,8 @@ double TestFunction()
 {
     return 100;
 }
-double TestFunction2(double input)
-{
-    return std::sqrt(input);
-}
+
+
 
 ContextMenu* GenerateContextMenu()
 {
@@ -265,6 +264,14 @@ ContextMenu* GenerateContextMenu()
         { DataPort(Data::Data_Type::Float) },
         { DataPort(Data::Data_Type::Weird) }, "Float to Weird", Casting, NodeCast::FloattoWeird));
 
+    Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Weird) },
+        { DataPort(Data::Data_Type::String) }, "Weird to String", Casting, NodeCast::WeirdtoString));
+    Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::String) },
+        { DataPort(Data::Data_Type::Weird) }, "String to Weird", Casting, NodeCast::StringtoWeird));
+
+
     //Debug
     Debug->Options.push_back(new NodeCreator(Node::Node_Type::Node_Action,
         { DataPort(Data::Data_Type::String) },
@@ -276,7 +283,10 @@ ContextMenu* GenerateContextMenu()
         { DataPort(Data::Data_Type::Float) }, "Time", CInput, NodeInput::Time));
 
     AddCustomEmptyCalculation(CSTD, "test", TestFunction);
-    AddCustomStandardCalculation(CSTD, "test 2", TestFunction2);
+    //static cast to choose which overload
+    AddCustomStandardCalculation(CSTD, "test 2", static_cast<double (*)(double)>(&std::sqrt));
+
+
     return CM;
 }
 

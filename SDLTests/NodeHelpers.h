@@ -4,6 +4,7 @@
 #include "ContextMenu.h"
 #include "DataType.h"
 #include <cstdarg>
+#include <locale>
 
 std::vector<Input*> CreateInputs(std::vector<DataPort> itemarray);
 
@@ -17,6 +18,8 @@ Data* GetNodeDefault(Data::Data_Type intype);
 
 //basic example
 ContextMenu* GenerateContextMenu();
+
+const char* myToUppercase(const char* in);
 
 template <class I>
 void AddCustomEmptyCalculation(ContextCategory* inCM, const char* name, I(*f)())

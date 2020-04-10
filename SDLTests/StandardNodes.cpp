@@ -196,7 +196,6 @@ Data* NodeCast::InttoFloat(std::vector<Data*> Inputs)
 Data* NodeCast::WeirdtoFloat(std::vector<Data*> Inputs)
 {
     NodeWeird<double>* convert = (NodeWeird<double>*)Inputs[0];
-    //NodeFloat* input1 = (NodeFloat*)Inputs[0];
     return new NodeFloat(convert->value);
 }
 
@@ -204,6 +203,18 @@ Data* NodeCast::FloattoWeird(std::vector<Data*> Inputs)
 {
     NodeFloat* input1 = (NodeFloat*)Inputs[0];
     return new NodeWeird<double>(input1->value);
+}
+
+Data* NodeCast::WeirdtoString(std::vector<Data*> Inputs)
+{
+    NodeWeird<const char*>* convert = (NodeWeird<const char*>*)Inputs[0];
+    return new NodeString(convert->value);
+}
+
+Data* NodeCast::StringtoWeird(std::vector<Data*> Inputs)
+{
+    NodeString* input1 = (NodeString*)Inputs[0];
+    return new NodeWeird<const char*>(input1->value);
 }
 
 //Actions ========================================
