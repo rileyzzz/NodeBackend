@@ -81,6 +81,7 @@ class Node
 
 
 		std::function<Data * ()> weirdCalculate;
+		std::function<Data * (Data*)> weirdCalculateWithArg;
 
 		typedef Data* (*InputFunc)();
 
@@ -165,6 +166,7 @@ public:
 		Selected = false;
 		//std::cout << "Created node " << title << ".\n";
 	}
+	//Weird Input
 	DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, std::function<Data * ()> f, int x = 0, int y = 0)
 	{
 		ID = givenID;
@@ -188,6 +190,39 @@ public:
 		}
 
 		weirdCalculate = f;
+
+
+		title = givenTitle;
+		renderable = new NodeDrawable();
+		renderable->x = x;
+		renderable->y = y;
+		Selected = false;
+		//std::cout << "Created node " << title << ".\n";
+	}
+	//Weird Calc
+	DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, std::function<Data * (Data*)> f, int x = 0, int y = 0)
+	{
+		ID = givenID;
+		type = givenType;
+		inputs = givenInputs;
+		outputs = givenOutputs;
+		//set IO parents
+		if (inputs.size())
+		{
+			for (int iter = 0; iter < inputs.size(); iter++)
+			{
+				inputs[iter]->ParentNode = this;
+			}
+		}
+		if (outputs.size())
+		{
+			for (int iter = 0; iter < outputs.size(); iter++)
+			{
+				outputs[iter]->ParentNode = this;
+			}
+		}
+
+		weirdCalculateWithArg = f;
 
 
 		title = givenTitle;

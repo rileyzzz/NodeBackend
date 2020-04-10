@@ -3,6 +3,7 @@
 #include "Node.h"
 #include "ContextMenu.h"
 #include "DataType.h"
+#include <cstdarg>
 
 std::vector<Input*> CreateInputs(std::vector<DataPort> itemarray);
 
@@ -18,8 +19,6 @@ Data* GetNodeDefault(Data::Data_Type intype);
 ContextMenu* GenerateContextMenu();
 
 template <class I>
-//I (*f)()
-//std::function<I()> f
 void AddCustomEmptyCalculation(ContextCategory* inCM, const char* name, I(*f)())
 {
     //va_list ap;
@@ -35,5 +34,23 @@ void AddCustomEmptyCalculation(ContextCategory* inCM, const char* name, I(*f)())
 
     inCM->Options.push_back(new NodeCreator(Node::Node_Type::Node_Input,
         {  },
+        { DataPort(Data::Data_Type::Weird) }, name, inCM, buildfunc));
+}
+//I - function final output type, T - function required input type
+template <class I, class T>
+void AddCustomStandardCalculation(ContextCategory* inCM, const char* name, I(*f)(T))
+{
+
+    auto buildfunc = [f](Data* argument)
+    {
+        NodeWeird<T>* convertedargument = (NodeWeird<T>*)argument;
+        I returnvalue = f(convertedargument->value);
+        NodeWeird<I>* returnnode = new NodeWeird<I>(returnvalue);
+        Data* convertnode = (Data*)returnnode;
+        return convertnode;
+    };
+
+    inCM->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Weird) },
         { DataPort(Data::Data_Type::Weird) }, name, inCM, buildfunc));
 }

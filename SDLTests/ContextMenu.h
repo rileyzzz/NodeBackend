@@ -42,7 +42,14 @@ public:
 	MyInput nodeInput;
 
 	bool weird;
+	enum class WeirdType {
+		Input,
+		Calc
+	};
+
+	WeirdType WeirdMode;
 	std::function<Data * ()> altInput;
+	std::function<Data * (Data*)> altCalc;
 
 	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, ContextCategory* inParent, Data* (*f)(std::vector<Data*>) = nullptr)
 	{
@@ -76,6 +83,7 @@ public:
 			nodeAction = f;
 		}
 	}
+	//Weird Input
 	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, ContextCategory* inParent, std::function<Data*()> f)
 	{
 		Type = Option_Type::CreateNode;
@@ -86,13 +94,31 @@ public:
 		Selected = false;
 		Parent = inParent;
 		weird = true;
+		WeirdMode = WeirdType::Input;
 		Renderable = new ContextRenderable();
 		if (f)
 		{
 			altInput = f;
 		}
 	}
-
+	//Weird Calculation
+	NodeCreator(Node::Node_Type inType, std::vector<DataPort> inputs, std::vector<DataPort> outputs, const char* inName, ContextCategory* inParent, std::function<Data * (Data*)> f)
+	{
+		Type = Option_Type::CreateNode;
+		NodeType = inType;
+		inPorts = inputs;
+		outPorts = outputs;
+		Name = inName;
+		Selected = false;
+		Parent = inParent;
+		weird = true;
+		WeirdMode = WeirdType::Calc;
+		Renderable = new ContextRenderable();
+		if (f)
+		{
+			altCalc = f;
+		}
+	}
 };
 
 class ContextCategory

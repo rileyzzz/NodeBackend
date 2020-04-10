@@ -1,6 +1,5 @@
 #include "NodeHelpers.h"
 #include "StandardNodes.h"
-#include <cstdarg>
 
 
 std::vector<Input*> CreateInputs(std::vector<DataPort> itemarray)
@@ -45,7 +44,6 @@ Data* CalculateLinkChain(Output* srcLink)
             {
                 returnval = ParentNode->weirdCalculate();
             }
-            
             break;
         case Node::Node_Type::Node_Event:
             if (ParentNode->InputData)
@@ -73,7 +71,14 @@ Data* CalculateLinkChain(Output* srcLink)
                         sendInputs.push_back(GetNodeDefault(ParentNode->inputs[dependency]->port.PortType));
                     }
                 }
-                returnval = ParentNode->Calculate(sendInputs);
+                if (ParentNode->Calculate)
+                {
+                    returnval = ParentNode->Calculate(sendInputs);
+                }
+                else if (ParentNode->weirdCalculateWithArg)
+                {
+                    returnval = ParentNode->weirdCalculateWithArg(sendInputs[0]);
+                }
                 ParentNode->CalculatedInputs = sendInputs;
             }
             break;
@@ -140,9 +145,12 @@ Data* GetNodeDefault(Data::Data_Type intype)
 
 double TestFunction()
 {
-    return 12;
+    return 100;
 }
-
+double TestFunction2(double input)
+{
+    return std::sqrt(input);
+}
 
 ContextMenu* GenerateContextMenu()
 {
@@ -253,6 +261,9 @@ ContextMenu* GenerateContextMenu()
     Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
         { DataPort(Data::Data_Type::Weird) },
         { DataPort(Data::Data_Type::Float) }, "Weird to Float", Casting, NodeCast::WeirdtoFloat));
+    Casting->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+        { DataPort(Data::Data_Type::Float) },
+        { DataPort(Data::Data_Type::Weird) }, "Float to Weird", Casting, NodeCast::FloattoWeird));
 
     //Debug
     Debug->Options.push_back(new NodeCreator(Node::Node_Type::Node_Action,
@@ -265,7 +276,7 @@ ContextMenu* GenerateContextMenu()
         { DataPort(Data::Data_Type::Float) }, "Time", CInput, NodeInput::Time));
 
     AddCustomEmptyCalculation(CSTD, "test", TestFunction);
-
+    AddCustomStandardCalculation(CSTD, "test 2", TestFunction2);
     return CM;
 }
 

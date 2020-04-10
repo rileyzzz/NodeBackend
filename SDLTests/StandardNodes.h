@@ -71,6 +71,8 @@ public:
 	static Data* InttoFloat(std::vector<Data*> Inputs);
 
 	static Data* WeirdtoFloat(std::vector<Data*> Inputs);
+
+	static Data* FloattoWeird(std::vector<Data*> Inputs);
 };
 
 //Debug
