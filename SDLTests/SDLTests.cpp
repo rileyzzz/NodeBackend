@@ -888,8 +888,6 @@ int main(int argc, char* argv[])
             }
         }
 
-        EventExampleNode->Run();
-
 
         if (MiddleMouse)
         {
