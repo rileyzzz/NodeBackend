@@ -149,7 +149,10 @@ double TestFunction()
     return 100;
 }
 
-
+const char* TestString()
+{
+    return "This is from a weird function!";
+}
 
 ContextMenu* GenerateContextMenu()
 {
@@ -283,6 +286,7 @@ ContextMenu* GenerateContextMenu()
         { DataPort(Data::Data_Type::Float) }, "Time", CInput, NodeInput::Time));
 
     AddCustomEmptyCalculation(CSTD, "test", TestFunction);
+    AddCustomEmptyCalculation(CSTD, "String Example", TestString);
     //static cast to choose which overload
     AddCustomStandardCalculation(CSTD, "test 2", static_cast<double (*)(double)>(&std::sqrt));
 
