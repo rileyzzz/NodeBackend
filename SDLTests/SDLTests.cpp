@@ -905,17 +905,42 @@ int main(int argc, char* argv[])
                 }
                 break;
             case SDL_MOUSEWHEEL:
+            {
+                int mouseX, mouseY;
+                SDL_GetMouseState(&mouseX, &mouseY);
+                int gridcoordX, gridcoordY;
+                GetGridCoordinates(mouseX, mouseY, &gridcoordX, &gridcoordY);
                 if (event.wheel.y > 0) // scroll up
                 {
-                    if (zoomLevel < zoomMax) zoomLevel++;
+                    
+                    if (zoomLevel < zoomMax)
+                    {
+                        zoomLevel++;
+                        
+                        int newx, newy;
+                        GetScreenCoordinates((-gridcoordX) / globalScaleFactor, (-gridcoordY) / globalScaleFactor, &newx, &newy);
+                        gridoffsetX = newx;
+                        gridoffsetY = newy;
+
+                    }
                     if (globalScaleFactor < zoomMax) globalScaleFactor++;
                 }
                 else if (event.wheel.y < 0) // scroll down
                 {
-                    if (zoomLevel > zoomMin) zoomLevel--;
+
+                    if (zoomLevel > zoomMin)
+                    {
+                        zoomLevel--;
+                        
+                        int newx, newy;
+                        GetScreenCoordinates(gridcoordX / globalScaleFactor, gridcoordY / globalScaleFactor, &newx, &newy);
+                        gridoffsetX = newx;
+                        gridoffsetY = newy;
+                    }
                     if (globalScaleFactor > zoomMin) globalScaleFactor--;
                 }
                 break;
+            }
             }
         }
 
