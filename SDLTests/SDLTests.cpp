@@ -110,19 +110,19 @@ int main(int argc, char* argv[])
         printf("error initializing SDL: %s\n", SDL_GetError());
     }
 
-    int scrw = 1920;
-    int scrh = 1080;
-    SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        scrw, scrh, 0);
-
-    //int scrw = 3840;
-    //int scrh = 2160;
+    //int scrw = 1920;
+    //int scrh = 1080;
     //SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
     //    SDL_WINDOWPOS_CENTERED,
     //    SDL_WINDOWPOS_CENTERED,
-    //    scrw, scrh, SDL_WINDOW_FULLSCREEN);
+    //    scrw, scrh, 0);
+
+    int scrw = 3840;
+    int scrh = 2160;
+    SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        scrw, scrh, SDL_WINDOW_FULLSCREEN);
 
     // triggers the program that controls 
     // your graphics hardware and sets flags 
@@ -350,7 +350,7 @@ int main(int argc, char* argv[])
     SDL_Texture* Porttex = SDL_CreateTextureFromSurface(rend, Portsurface);
     SDL_FreeSurface(Portsurface);
 
-    Flowsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/io.png");
+    Flowsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/flow.png");
     SDL_Texture* Flowtex = SDL_CreateTextureFromSurface(rend, Flowsurface);
     SDL_FreeSurface(Flowsurface);
 
@@ -1152,8 +1152,8 @@ int main(int argc, char* argv[])
             SDL_Texture* Message = SDL_CreateTextureFromSurface(rend, nodeMessage); //now you can convert it into a texture
 
             SDL_Rect Message_rect; //create a rect
-            Message_rect.x = drawX + 2 * globalScaleFactor;  //controls the rect's x coordinate 
-            Message_rect.y = drawY + 2 * globalScaleFactor; // controls the rect's y coordinte
+            Message_rect.x = drawX + 6 * globalScaleFactor;  //controls the rect's x coordinate 
+            Message_rect.y = drawY + 6 * globalScaleFactor; // controls the rect's y coordinte
 
             TTF_SizeText(Sans, text, &Message_rect.w, &Message_rect.h);
 
@@ -1215,10 +1215,12 @@ int main(int argc, char* argv[])
                 SDL_Texture* OutputMessage = SDL_CreateTextureFromSurface(rend, OutputnodeMessage);
 
                 SDL_Rect OutputMessage_rect;
-                OutputMessage_rect.x = drawX + 2 * globalScaleFactor;
-                OutputMessage_rect.y = drawY + (NodeElement.h - OutputTextSize) - 2 * globalScaleFactor;
+                
 
                 TTF_SizeText(OutputFont, OutputChar, &OutputMessage_rect.w, &OutputMessage_rect.h);
+
+                OutputMessage_rect.x = drawX + 6 * globalScaleFactor;
+                OutputMessage_rect.y = drawY + (NodeElement.h - OutputTextSize) - 6 * globalScaleFactor;
 
                 SDL_RenderCopy(rend, OutputMessage, NULL, &OutputMessage_rect);
 
