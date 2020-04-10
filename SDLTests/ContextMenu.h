@@ -42,12 +42,7 @@ public:
 	MyInput nodeInput;
 
 	bool weird;
-	enum class WeirdType {
-		Input,
-		Calc
-	};
 
-	WeirdType WeirdMode;
 	std::function<Data * ()> altInput;
 	std::function<Data * (Data*)> altCalc;
 
@@ -94,7 +89,6 @@ public:
 		Selected = false;
 		Parent = inParent;
 		weird = true;
-		WeirdMode = WeirdType::Input;
 		Renderable = new ContextRenderable();
 		if (f)
 		{
@@ -112,7 +106,6 @@ public:
 		Selected = false;
 		Parent = inParent;
 		weird = true;
-		WeirdMode = WeirdType::Calc;
 		Renderable = new ContextRenderable();
 		if (f)
 		{
