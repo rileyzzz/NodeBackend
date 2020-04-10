@@ -51,9 +51,9 @@ static void DestroyNode(Node* node)
     NodeStack.erase(std::remove(NodeStack.begin(), NodeStack.end(), node), NodeStack.end());
 }
 
-ActionNode* CreateActionNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, bool (*f)(std::vector<Data*>) = nullptr)
+ActionNode* CreateActionNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, ActionNode::ActionType FlowType, int x = 0, int y = 0, bool (*f)(std::vector<Data*>) = nullptr)
 {
-    ActionNode* NewNode = new ActionNode(IDcount, type, inputs, outputs, title, x, y, f);
+    ActionNode* NewNode = new ActionNode(IDcount, type, inputs, outputs, title, FlowType, x, y, f);
     IDcount++;
     NodeStack.push_back(NewNode);
     return NewNode;
@@ -74,7 +74,16 @@ void GetGridCoordinates(int x, int y, int* sendX, int* sendY)
     *sendY = (y - (gridoffsetY + MMoffsetY)) / globalScaleFactor;
 }
 
-
+void LinkActionNodes(ActionNode* Node1, ActionNode* Node2)
+{
+    Node1->Next = Node2;
+    Node2->Previous = Node1;
+}
+void UnlinkActionNodes(ActionNode* Node1, ActionNode* Node2)
+{
+    Node1->Next = nullptr;
+    Node2->Previous = nullptr;
+}
 
 int main(int argc, char* argv[])
 {
@@ -147,6 +156,10 @@ int main(int argc, char* argv[])
     DataPort* currentDragNewPort = nullptr;
     Linkable* currentDragNewPortParent = nullptr;
 
+    bool draggingFlow = false;
+    DataFlow* currentDragFlow = nullptr;
+    bool draggingNewFlow = false;
+    DataFlow* currentDragNewFlow = nullptr;
 
     ContextMenu* RightClickContext = GenerateContextMenu();
     bool ContextMenuOpen = false;
@@ -223,7 +236,7 @@ int main(int argc, char* argv[])
     std::vector<Input*> EventnodeInputs;
     std::vector<Output*> EventnodeOutputs = CreateOutputs(EventoutPorts);
 
-    ActionNode* EventExampleNode = CreateActionNode(Node::Node_Type::Node_Event, EventnodeInputs, EventnodeOutputs, "Key Enter", 0, 200);
+    ActionNode* EventExampleNode = CreateActionNode(Node::Node_Type::Node_Event, EventnodeInputs, EventnodeOutputs, "Key Enter", ActionNode::ActionType::RightOutput, 0, 200);
 
 
     std::vector<DataPort> PrintinPorts{ DataPort(Data::Data_Type::String) };
@@ -231,10 +244,10 @@ int main(int argc, char* argv[])
     std::vector<Input*> PrintnodeInputs = CreateInputs(PrintinPorts);
     std::vector<Output*> PrintnodeOutputs;
 
-    ActionNode* PrintExampleNode = CreateActionNode(Node::Node_Type::Node_Action, PrintnodeInputs, PrintnodeOutputs, "Print", 150, 200, NodeDebug::Print);
+    ActionNode* PrintExampleNode = CreateActionNode(Node::Node_Type::Node_Action, PrintnodeInputs, PrintnodeOutputs, "Print", ActionNode::ActionType::DoubleSided, 150, 200, NodeDebug::Print);
 
     //Link the flow between event and print
-    EventExampleNode->Next = PrintExampleNode;
+    LinkActionNodes(EventExampleNode, PrintExampleNode);
 
     //Link the IO string
     //PrintExampleNode->inputs[0]->link = EventExampleNode->outputs[0];
@@ -315,10 +328,15 @@ int main(int argc, char* argv[])
     SDL_Rect NodeElement;
     SDL_Rect Portdest;
     SDL_Surface* Portsurface;
-
+    SDL_Surface* Flowsurface;
     Portsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/io.png");
     SDL_Texture* Porttex = SDL_CreateTextureFromSurface(rend, Portsurface);
     SDL_FreeSurface(Portsurface);
+
+    Flowsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/io.png");
+    SDL_Texture* Flowtex = SDL_CreateTextureFromSurface(rend, Flowsurface);
+    SDL_FreeSurface(Flowsurface);
+
     SDL_QueryTexture(tex, NULL, NULL, &Nodedest.w, &Nodedest.h);
 
     TTF_Init();
@@ -463,7 +481,7 @@ int main(int argc, char* argv[])
                                         NewNode = CreateNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, NewNodeX, NewNodeY, NodeConstructor->Function);
                                         break;
                                     case Node::Node_Type::Node_Action:
-                                        NewNode = CreateActionNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, NewNodeX, NewNodeY, NodeConstructor->nodeAction);
+                                        NewNode = CreateActionNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, ActionNode::ActionType::DoubleSided, NewNodeX, NewNodeY, NodeConstructor->nodeAction);
                                         break;
                                     case Node::Node_Type::Node_Input:
                                         NewNode = CreateInputNode(NodeConstructor->NodeType, NewInputs, NewOutputs, NodeConstructor->Name, NewNodeX, NewNodeY, NodeConstructor->nodeInput);
@@ -522,6 +540,52 @@ int main(int argc, char* argv[])
                     }
                     if (draggingPort) break;
                     if (draggingNewPort) break;
+                    //Flow Test
+                    for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
+                    {
+                        Node* checkNode = NodeStack[Nodecount];
+                        if (checkNode->type == Node::Node_Type::Node_Action || checkNode->type == Node::Node_Type::Node_Event)
+                        {
+                            ActionNode* checkNodeCast = (ActionNode*)checkNode;
+
+                            //inputs / left
+                            if (checkNodeCast->FlowType == ActionNode::ActionType::DoubleSided || checkNodeCast->FlowType == ActionNode::ActionType::LeftInput)
+                            {
+                                
+                                DataFlow* Curport = &checkNodeCast->LeftPort;
+
+                                if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize && mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
+                                {
+                                    //make sure it's already linked
+                                    if (checkNodeCast->Previous)
+                                    {
+                                        std::cout << "this is working";
+                                        currentDragFlow = Curport;
+                                        //currentDragPortParent = checkNode->inputs[Portcount];
+                                        draggingFlow = true;
+                                    }
+                                }
+                            }
+                            if (draggingFlow) break;
+                            //outputs / right
+                            if (checkNodeCast->FlowType == ActionNode::ActionType::DoubleSided || checkNodeCast->FlowType == ActionNode::ActionType::RightOutput)
+                            {
+                                DataFlow* Curport = &checkNodeCast->RightPort;
+
+                                if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize && mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
+                                {
+                                    currentDragNewFlow = Curport;
+                                    //currentDragNewPortParent = checkNode->outputs[Portcount];
+                                    draggingNewFlow = true;
+                                }
+                            }
+                            if (draggingNewPort) break;
+                        }
+                    }
+                    if (draggingPort) break;
+                    if (draggingNewPort) break;
+                    if (draggingFlow) break;
+                    if (draggingNewFlow) break;
                     //node test
                     bool HitNode = false;
                     for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
@@ -613,6 +677,7 @@ int main(int argc, char* argv[])
                     SDL_GetMouseState(&mouseX, &mouseY);
                     //port test
                     bool HitPort = false;
+                    bool HitFlow = false;
                     for (int Nodecount = 0; Nodecount < NodeStack.size(); Nodecount++)
                     {
                         Node* checkNode = NodeStack[Nodecount];
@@ -628,21 +693,10 @@ int main(int argc, char* argv[])
                                 {
                                     HitPort = true;
                                     if (currentDragPort != Curport && currentDragPortParent->type == Linkable::Link_Type::Input && currentDragPort->SubType == checkNode->inputs[Portcount]->port.SubType)
-                                    {
-                                        //std::cout << "Dragged to different output!";
-                                            
+                                    { 
                                         //need to get the linked IO, not the IO itself - this will be out new link source
                                         Input* movedIO = (Input*)currentDragPortParent;
                                         Output* other = movedIO->link;
-
-                                        /*if (other)
-                                        {
-                                            std::cout << "yeah it worked";
-                                        }
-                                        else
-                                        {
-                                            std::cout << "didnt work";
-                                        }*/
 
                                         //destroy both links entirely
                                         //and remove from link stack
@@ -662,8 +716,6 @@ int main(int argc, char* argv[])
                                 }
                             }
                         }
-
-
 
                         //outputs
                         if (draggingNewPort)
@@ -689,7 +741,85 @@ int main(int argc, char* argv[])
                             }
                         }
 
+                        //Flow
 
+                        //inputs / left
+                        if (draggingFlow)
+                        {
+                            for (int Portcount = 0; Portcount < checkNode->inputs.size(); Portcount++)
+                            {
+                                if (checkNode->type == Node::Node_Type::Node_Action || checkNode->type == Node::Node_Type::Node_Event)
+                                {
+                                    ActionNode* checkActionNode = (ActionNode*)checkNode;
+                                    DataFlow* Curport = &checkActionNode->LeftPort;
+
+                                    if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize && mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
+                                    {
+                                        HitFlow = true;
+                                        if (currentDragFlow != Curport)
+                                        {
+                                            //need to get the linked IO, not the IO itself - this will be out new link source
+                                            //Input* movedIO = (Input*)currentDragFlowParent; moved io is where original link is from to
+                                            //Output* other = movedIO->link;
+
+                                            //destroy both links entirely
+                                            //and remove from link stack
+                                            ActionNode* orig = (ActionNode*)currentDragFlow->parent;
+                                            ActionNode* from = orig->Previous;
+                                            //if (from->Next)
+                                            //{
+                                            
+                                                //UnlinkActionNodes(checkActionNode->Previous, checkActionNode);
+                                            UnlinkActionNodes(from, orig);
+                                                //checkActionNode->Previous = nullptr;
+                                            //}
+
+                                            /*if (checkNode->inputs[Portcount]->currentLink)
+                                            {
+                                                LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), checkNode->inputs[Portcount]->currentLink), LinkStack.end());
+                                                Unlink(checkNode->inputs[Portcount]->currentLink);
+                                            }*/
+                                            LinkActionNodes(from, checkActionNode);
+                                            //LinkActionNodes(checkActionNode, from);
+                                            //from->Next = checkActionNode;
+                                            //checkActionNode->Previous = from;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        //outputs / right
+                        if (draggingNewFlow)
+                        {
+                            for (int Portcount = 0; Portcount < checkNode->inputs.size(); Portcount++)
+                            {
+                                if (checkNode->type == Node::Node_Type::Node_Action || checkNode->type == Node::Node_Type::Node_Event)
+                                {
+                                    ActionNode* checkActionNode = (ActionNode*)checkNode;
+                                    DataFlow* Curport = &checkActionNode->LeftPort;
+
+                                    if (mouseX > Curport->renderX - PortHitboxSize && mouseX < Curport->renderX + PortHitboxSize && mouseY > Curport->renderY - PortHitboxSize && mouseY < Curport->renderY + PortHitboxSize)
+                                    {
+                                        if (currentDragNewFlow != Curport && currentDragNewFlow->parent != Curport->parent)
+                                        {
+                                            //std::cout << "Dragged to different output!";
+                                            ActionNode* from = (ActionNode*)currentDragNewFlow->parent;
+                                            if (checkActionNode->Previous)
+                                            {
+                                                //LinkStack.erase(std::remove(LinkStack.begin(), LinkStack.end(), checkNode->inputs[Portcount]->currentLink), LinkStack.end());
+                                                //Unlink(checkNode->inputs[Portcount]->currentLink);
+                                                checkActionNode->Previous = nullptr;
+                                            }
+                                            from->Next = checkActionNode;
+                                            checkActionNode->Previous = from;
+                                            //LinkStack.push_back(new Link((Output*)currentDragNewPortParent, checkNode->inputs[Portcount]));
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     if (currentDragPortParent && currentDragPortParent->currentLink && !HitPort)
@@ -707,6 +837,10 @@ int main(int argc, char* argv[])
                     draggingNode = false;
                     //currentDrag.clear();
                     draggingPort = false;
+                    draggingFlow = false;
+                    draggingNewFlow = false;
+                    currentDragFlow = nullptr;
+                    currentDragNewFlow = nullptr;
                     currentDragPort = nullptr;
                     currentDragPortParent = nullptr;
                     draggingNewPort = false;
@@ -855,6 +989,24 @@ int main(int argc, char* argv[])
             SDL_RenderDrawLine(rend, currentDragNewPortParent->port.renderX, currentDragNewPortParent->port.renderY, mouseX, mouseY);
         }
 
+        if (draggingFlow)
+        {
+            int mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
+
+            currentDragFlow->offsetX = mouseX - currentDragFlow->renderX;
+            currentDragFlow->offsetY = mouseY - currentDragFlow->renderY;
+        }
+
+
+        if (draggingNewFlow)
+        {
+            int mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
+            SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
+            SDL_RenderDrawLine(rend, currentDragNewFlow->renderX, currentDragNewFlow->renderY, mouseX, mouseY);
+        }
+
         //Draw Links
         for (int curLink = 0; curLink < LinkStack.size(); curLink++)
         {
@@ -864,6 +1016,18 @@ int main(int argc, char* argv[])
             SDL_RenderDrawLine(rend, current->LinkInput->port.renderX + current->LinkInput->port.offsetX, current->LinkInput->port.renderY + current->LinkInput->port.offsetY, current->LinkOutput->port.renderX + current->LinkOutput->port.offsetX, current->LinkOutput->port.renderY + current->LinkOutput->port.offsetY);
         }
 
+        //Draw Flow
+        for (auto& curAction : NodeStack) {
+            if (curAction->type == Node::Node_Type::Node_Action || curAction->type == Node::Node_Type::Node_Event)
+            {
+                ActionNode* curActionCast = (ActionNode*)curAction;
+                if (curActionCast->Next)
+                {
+                    SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
+                    SDL_RenderDrawLine(rend, curActionCast->RightPort.renderX + curActionCast->RightPort.offsetX, curActionCast->RightPort.renderY + curActionCast->RightPort.offsetY, curActionCast->Next->LeftPort.renderX + curActionCast->Next->LeftPort.offsetX, curActionCast->Next->LeftPort.renderY + curActionCast->Next->LeftPort.offsetY);
+                }
+            }
+        }
 
         //Draw Nodes
         for (int NodeIter = 0; NodeIter < NodeStack.size(); NodeIter++)
@@ -932,6 +1096,7 @@ int main(int argc, char* argv[])
             SDL_FreeSurface(nodeMessage);
             TTF_CloseFont(Sans);
 
+            //Display output
             int OutputTextSize = 8 * globalScaleFactor;
             if (DrawNodeOutput && curNode->type == Node::Node_Type::Node_Output)
             {
@@ -995,8 +1160,65 @@ int main(int argc, char* argv[])
             
             //draw ports
             
+            
+
             //actual circle
             int IOSize = 8 * globalScaleFactor;
+
+            //Draw Event ports
+            
+            if (curNode->type == Node::Node_Type::Node_Event || curNode->type == Node::Node_Type::Node_Action)
+            {
+                ActionNode* eventNode = (ActionNode*)curNode;
+                switch (eventNode->FlowType)
+                {
+                    case ActionNode::ActionType::DoubleSided:
+                    {
+                        
+                        int topY = (renderable->topMargin - 12) * globalScaleFactor + drawY;
+
+                        SDL_Rect FlowPort;
+                        FlowPort.x = drawX - 4 * globalScaleFactor;
+                        FlowPort.y = topY;
+                        FlowPort.w = IOSize;
+                        FlowPort.h = IOSize;
+
+                        if (&eventNode->LeftPort != currentDragPort)
+                        {
+                            eventNode->LeftPort.renderX = FlowPort.x + IOSize / 2;
+                            eventNode->LeftPort.renderY = FlowPort.y + IOSize / 2;
+                        }
+
+                        SDL_RenderCopy(rend, Flowtex, NULL, &FlowPort);
+
+                        FlowPort.w = IOSize;
+                        FlowPort.h = IOSize;
+                        FlowPort.x = renderable->width * globalScaleFactor + drawX - 4 * globalScaleFactor;
+                        FlowPort.y = topY;
+
+                        eventNode->RightPort.renderX = FlowPort.x + IOSize / 2;
+                        eventNode->RightPort.renderY = FlowPort.y + IOSize / 2;
+
+                        SDL_RenderCopy(rend, Flowtex, NULL, &FlowPort);
+                        break;
+                    }
+                    case ActionNode::ActionType::RightOutput:
+                    {
+                        int topY = (renderable->topMargin - 12) * globalScaleFactor + drawY;
+                        SDL_Rect FlowPort;
+                        FlowPort.w = IOSize;
+                        FlowPort.h = IOSize;
+                        FlowPort.x = renderable->width * globalScaleFactor + drawX - 4 * globalScaleFactor;
+                        FlowPort.y = topY;
+
+                        eventNode->RightPort.renderX = FlowPort.x + IOSize / 2;
+                        eventNode->RightPort.renderY = FlowPort.y + IOSize / 2;
+
+                        SDL_RenderCopy(rend, Flowtex, NULL, &FlowPort);
+                        break;
+                    }
+                }
+            }
 
             for (int curInput = 0; curInput < inputcount; curInput++)
             {
@@ -1085,6 +1307,9 @@ int main(int argc, char* argv[])
                 SDL_RenderCopy(rend, Porttex, NULL, &Portdest);
                 
             }
+
+            
+
         }
 
         //Draw Node List BG
@@ -1265,6 +1490,7 @@ int main(int argc, char* argv[])
 
     SDL_DestroyTexture(Nodetex);
     SDL_DestroyTexture(Porttex);
+    SDL_DestroyTexture(Flowtex);
     // destroy renderer 
     SDL_DestroyRenderer(rend);
 

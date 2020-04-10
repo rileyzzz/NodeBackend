@@ -8,6 +8,7 @@ class Output;
 class Node;
 class Linkable;
 class Link;
+class DataFlow;
 
 class Linkable
 {
@@ -161,6 +162,12 @@ public:
 	}
 };
 
+class DataFlow : public DataPort
+{
+public:
+	Node* parent;
+};
+
 class ActionNode : public Node
 {
 public:
@@ -177,12 +184,29 @@ public:
 
 	void Run();
 
-	ActionNode(int givenID, Node::Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, bool (*f)(std::vector<Data*>) = nullptr)
+	enum class ActionType {
+		DoubleSided,
+		RightOutput,
+		LeftInput,
+		Special
+	};
+
+	ActionType FlowType;
+
+	DataFlow LeftPort;
+	DataFlow RightPort;
+
+	ActionNode(int givenID, Node::Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, ActionType inFlow, int x = 0, int y = 0, bool (*f)(std::vector<Data*>) = nullptr)
 	{
 		ID = givenID;
 		type = givenType;
 		inputs = givenInputs;
 		outputs = givenOutputs;
+		FlowType = inFlow;
+
+
+		LeftPort.parent = this;
+		RightPort.parent = this;
 		//set IO parents
 		if (inputs.size())
 		{
@@ -212,6 +236,8 @@ public:
 		//std::cout << "Created node " << title << ".\n";
 	}
 };
+
+
 
 class Link
 {
