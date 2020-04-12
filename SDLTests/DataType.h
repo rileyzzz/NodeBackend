@@ -32,6 +32,12 @@ public:
 		type = Data_Type::Boolean;
 		subtype = Data_Type::Boolean;
 	}
+	NodeBoolean()
+	{
+		value = false;
+		type = Data_Type::Boolean;
+		subtype = Data_Type::Boolean;
+	}
 };
 
 class NodeInteger : public NodeNumeric
@@ -40,6 +46,12 @@ public:
 	NodeInteger(int input)
 	{
 		value = input;
+		type = Data_Type::Integer;
+		subtype = Data_Type::Numeric;
+	}
+	NodeInteger()
+	{
+		value = 0;
 		type = Data_Type::Integer;
 		subtype = Data_Type::Numeric;
 	}
@@ -54,6 +66,12 @@ public:
 		type = Data_Type::Float;
 		subtype = Data_Type::Numeric;
 	}
+	NodeFloat()
+	{
+		value = 0;
+		type = Data_Type::Float;
+		subtype = Data_Type::Numeric;
+	}
 };
 
 class NodeString : public Data
@@ -63,6 +81,12 @@ public:
 	NodeString(const char* input)
 	{
 		value = input;
+		type = Data_Type::String;
+		subtype = Data_Type::String;
+	}
+	NodeString()
+	{
+		value = "";
 		type = Data_Type::String;
 		subtype = Data_Type::String;
 	}

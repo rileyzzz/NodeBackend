@@ -83,6 +83,8 @@ class Node
 		std::function<Data * ()> weirdCalculate;
 		std::function<Data * (Data*)> weirdCalculateWithArg;
 
+		bool dynamic = false;
+
 		typedef Data* (*InputFunc)();
 
 		InputFunc InputCalculate;

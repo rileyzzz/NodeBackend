@@ -13,6 +13,7 @@
 #include "SDL_ttf.h"
 #include <string>
 #include <algorithm>
+#include "GraphCompiler.h"
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
 //each programmable object will contain a nodestack and id count that persist
@@ -110,19 +111,19 @@ int main(int argc, char* argv[])
         printf("error initializing SDL: %s\n", SDL_GetError());
     }
 
-    //int scrw = 1920;
-    //int scrh = 1080;
-    //SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
-    //    SDL_WINDOWPOS_CENTERED,
-    //    SDL_WINDOWPOS_CENTERED,
-    //    scrw, scrh, 0);
-
-    int scrw = 3840;
-    int scrh = 2160;
+    int scrw = 1920;
+    int scrh = 1080;
     SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        scrw, scrh, SDL_WINDOW_FULLSCREEN);
+        scrw, scrh, 0);
+
+    //int scrw = 3840;
+    //int scrh = 2160;
+    //SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
+    //    SDL_WINDOWPOS_CENTERED,
+    //    SDL_WINDOWPOS_CENTERED,
+    //    scrw, scrh, SDL_WINDOW_FULLSCREEN);
 
     // triggers the program that controls 
     // your graphics hardware and sets flags 
@@ -231,6 +232,9 @@ int main(int argc, char* argv[])
     LinkStack.push_back(new Link(ExampleNode2, 0, ExampleNode, 0));
     LinkStack.push_back(new Link(ExampleNode2, 1, tempExampleNode, 0));
 
+    
+    
+    
 
     //Data* outputresult = ExampleNode3->CalculateInputs();
     //NodeFloat* calcvalue = (NodeFloat*)outputresult;
@@ -448,6 +452,18 @@ int main(int argc, char* argv[])
                     }
                     break;
                 } 
+                case SDL_SCANCODE_TAB:
+                {
+                    //compile
+                    Graph* testExport = GraphCompiler::CompileGraphfromOutput(ExampleNode3);
+                    StaticGraph<NodeFloat>* exportConvert = (StaticGraph<NodeFloat>*)testExport;
+                    //NodeInteger* convert = (NodeInteger*)exportConvert->outputValue;
+                    //std::cout << "COMPILE VALUE IS " << convert->value << "\n";
+
+                    ExportGraph(testExport);
+                    ImportGraph();
+                    break;
+                }
                 case SDL_SCANCODE_SPACE:
                     showNodeList = !showNodeList;
                     break;
@@ -1040,6 +1056,10 @@ int main(int argc, char* argv[])
             }
         }
 
+        //set line scale
+        int lineScale = 2;
+
+        
         if (draggingPort)
         {
             int mouseX, mouseY;
@@ -1097,6 +1117,7 @@ int main(int argc, char* argv[])
                 }
             }
         }
+
 
         //Draw Nodes
         for (int NodeIter = 0; NodeIter < NodeStack.size(); NodeIter++)
