@@ -8,7 +8,6 @@ class Graph
 {
 public:
 	bool isDynamic;
-	const char temp[6] = "hello";
 	Data::Data_Type outputType;
 };
 
@@ -57,4 +56,4 @@ public:
 };
 
 void ExportGraph(Graph* graphExport);
-void ImportGraph();
+Graph* ImportGraph();

@@ -456,7 +456,7 @@ int main(int argc, char* argv[])
                 {
                     //compile
                     Graph* testExport = GraphCompiler::CompileGraphfromOutput(ExampleNode3);
-                    StaticGraph<NodeFloat>* exportConvert = (StaticGraph<NodeFloat>*)testExport;
+                    //StaticGraph<NodeFloat>* exportConvert = (StaticGraph<NodeFloat>*)testExport;
                     //NodeInteger* convert = (NodeInteger*)exportConvert->outputValue;
                     //std::cout << "COMPILE VALUE IS " << convert->value << "\n";
 
