@@ -1,24 +1,52 @@
 #include "Graph.h"
 
+std::vector<ExportableNode*> curNodeStack;
+
+void SetupTree(ExportableNode* inNode)
+{
+	if (!inNode->inputs.empty())
+	{
+		for (auto& curInput : inNode->inputs) {
+			if (curInput.link.ParentNode)
+			{
+				ExportableNode* nextNode = curInput.link.ParentNode;
+
+				//order is important here - we want all input child objects to come after a parent
+				curNodeStack.push_back(nextNode);
+				SetupTree(nextNode);
+			}
+		}
+	}
+}
+
 void ExportGraph(Graph* graphExport)
 {
+	curNodeStack.clear();
 	std::cout << "this is getting called\n";
 	std::ofstream outfile;
 	outfile.open("C:/Users/riley/source/repos/SDLTests/x64/Debug/export.graph", std::ios::out | std::ios::trunc);
 
-	//outfile << *graphExport << std::endl;
-	//Graph copyGraph = *graphExport;
+	//write header
+	//format: bool dynamic, enum datatype, graph data
+	outfile.write((char*)&graphExport->isDynamic, sizeof(bool));
+	outfile.write((char*)&graphExport->outputType, sizeof(Data::Data_Type));
+
 	if (graphExport->isDynamic)
 	{
+		//maybe export my weird custom calculation functions as a variable
+		std::cout << "it's dynamic\n";
+		DynamicGraph* convert = (DynamicGraph*)graphExport;
+		outfile.write((char*)convert, sizeof(DynamicGraph));
 
+		SetupTree(&convert->OutputNode);
+		for (auto& curNode : curNodeStack) {
+			outfile.write((char*)curNode, sizeof(ExportableNode));
+		}
+
+		//loop through and write each input's referenced node
 	}
 	else
 	{
-		//write header
-		//format: bool dynamic, enum datatype, graph data
-		outfile.write((char*)&graphExport->isDynamic, sizeof(bool));
-		outfile.write((char*)&graphExport->outputType, sizeof(Data::Data_Type));
-
 		switch (graphExport->outputType)
 		{
 		case Data::Data_Type::Boolean:

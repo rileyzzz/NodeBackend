@@ -455,13 +455,14 @@ int main(int argc, char* argv[])
                 case SDL_SCANCODE_TAB:
                 {
                     //compile
+                    ExampleNode3->dynamic = true;
                     Graph* testExport = GraphCompiler::CompileGraphfromOutput(ExampleNode3);
                     //StaticGraph<NodeFloat>* exportConvert = (StaticGraph<NodeFloat>*)testExport;
                     //NodeInteger* convert = (NodeInteger*)exportConvert->outputValue;
                     //std::cout << "COMPILE VALUE IS " << convert->value << "\n";
 
                     ExportGraph(testExport);
-                    ImportGraph();
+                    //ImportGraph();
                     break;
                 }
                 case SDL_SCANCODE_SPACE:

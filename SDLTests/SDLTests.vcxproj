@@ -155,6 +155,7 @@
   <ItemGroup>
     <ClCompile Include="ContextMenu.cpp" />
     <ClCompile Include="DataType.cpp" />
+    <ClCompile Include="Exportable.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="GraphCompiler.cpp" />
     <ClCompile Include="Node.cpp" />
@@ -166,6 +167,7 @@
   <ItemGroup>
     <ClInclude Include="ContextMenu.h" />
     <ClInclude Include="DataType.h" />
+    <ClInclude Include="Exportable.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="GraphCompiler.h" />
     <ClInclude Include="Node.h" />

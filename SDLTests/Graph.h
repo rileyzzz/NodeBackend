@@ -4,6 +4,7 @@
 #include "Node.h"
 #include <iostream>
 #include <fstream>
+#include "Exportable.h"
 class Graph
 {
 public:
@@ -45,13 +46,15 @@ public:
 
 class DynamicGraph : public Graph
 {
-private:
-	//copy over entire node list and then set their inputs to be part of this new vector
-	std::vector<Node> NodeStack;
 public:
+	//copy over entire node list and then set their inputs to be part of this new vector
+	ExportableNode OutputNode;
 	DynamicGraph(Node* outputNode)
 	{
 		isDynamic = true;
+
+		OutputNode = ExportableNode(outputNode);
+
 	}
 };
 

@@ -21,7 +21,7 @@ Graph* GraphCompiler::CompileGraphfromOutput(Node* outputNode)
 {
     bool isDynamic = DetermineDynamic(outputNode);
 
-    Graph* outputGraph;
+    Graph* outputGraph = nullptr;
 
     if (isDynamic)
     {
@@ -29,7 +29,36 @@ Graph* GraphCompiler::CompileGraphfromOutput(Node* outputNode)
     }
     else
     {
-        outputGraph = new StaticGraph<NodeFloat>(outputNode->CalculateInputs());
+        switch (outputNode->inputs[0]->port.PortType)
+        {
+        case Data::Data_Type::Boolean:
+        {
+            typedef NodeBoolean graphType;
+            outputGraph = new StaticGraph<graphType>(outputNode->CalculateInputs());
+            break;
+        }
+        case Data::Data_Type::Float:
+        {
+            typedef NodeFloat graphType;
+            outputGraph = new StaticGraph<graphType>(outputNode->CalculateInputs());
+            break;
+        }
+        case Data::Data_Type::Integer:
+        {
+            typedef NodeInteger graphType;
+            outputGraph = new StaticGraph<graphType>(outputNode->CalculateInputs());
+            break;
+        }
+        case Data::Data_Type::String:
+        {
+            typedef NodeString graphType;
+            outputGraph = new StaticGraph<graphType>(outputNode->CalculateInputs());
+            break;
+        }
+        }
+        
     }
     return outputGraph;
 }
+
+
