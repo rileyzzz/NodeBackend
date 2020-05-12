@@ -41,14 +41,14 @@ public:
 	ExportableNode* ParentNode = nullptr;
 	ExportOutput(Output* src)
 	{
-		if (src->link)
-		{
+		//if (src->link)
+		//{
 			//ParentNode = new ExportableNode(src->ParentNode);
 			//newOut.Label = src->Label;
-			port = src->port;
-			type = src->type;
+		port = src->port;
+		type = src->type;
 
-		}
+		//}
 	}
 	ExportOutput()
 	{
@@ -60,17 +60,16 @@ class ExportInput : public ExportLinkable
 {
 public:
 	ExportOutput link;
+	bool Linked;
 	ExportInput(Input* src)
 	{
-		if (src->link)
-		{
 			//cant have parent nodes, this is an input
 			//newIn.Label = src->Label;
-			port = src->port;
-			type = src->type;
+		port = src->port;
+		type = src->type;
 
 			//link = CreateExportOutput(src->link);
-		}
+		//}
 	}
 };
 
@@ -117,21 +116,26 @@ public:
 		type = copyNode->type;
 
 		for (auto& copyInput : copyNode->inputs) {
+			ExportInput newInput = ExportInput(copyInput);
 			if (copyInput->link)
 			{
 				Output* otherLink = copyInput->link;
-				ExportInput newInput = ExportInput(copyInput);
 
 				ExportOutput newOut = ExportOutput(otherLink);
 				newOut.ParentNode = new ExportableNode(otherLink->ParentNode);
 				newInput.link = newOut;
 
-				inputs.push_back(newInput);
+				newInput.Linked = true;
 			}
+			else
+			{
+				newInput.Linked = false;
+			}
+			inputs.push_back(newInput);
 		}
-		/*for (auto& copyOutput : copyNode->outputs) {
+		for (auto& copyOutput : copyNode->outputs) {
 			outputs.push_back(ExportOutput(copyOutput));
-		}*/
+		}
 		//std::string strconvert(copyNode->title);
 		title = copyNode->title;//dereference?
 		renderable = *copyNode->renderable;

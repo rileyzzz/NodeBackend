@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 
     int scrw = 1920;
     int scrh = 1080;
-    SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
+    SDL_Window* win = SDL_CreateWindow("Node Editor", // creates a window 
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         scrw, scrh, 0);
@@ -337,14 +337,6 @@ int main(int argc, char* argv[])
 
 
 
-
-    //Node texture
-    SDL_Surface* Nodesurface;
-
-    Nodesurface = IMG_Load("C:/Users/riley/Pictures/H2x1_SNES_SuperMarioWorld_image1600w.jpg");
-    SDL_Texture* Nodetex = SDL_CreateTextureFromSurface(rend, Nodesurface);
-    SDL_FreeSurface(Nodesurface);
-
     SDL_Rect Nodedest;
     SDL_Rect NodeElement;
     SDL_Rect Portdest;
@@ -455,14 +447,17 @@ int main(int argc, char* argv[])
                 case SDL_SCANCODE_TAB:
                 {
                     //compile
-                    ExampleNode3->dynamic = true;
-                    Graph* testExport = GraphCompiler::CompileGraphfromOutput(ExampleNode3);
+                    //ExampleNode3->dynamic = true;
+                    //Graph* testExport = GraphCompiler::CompileGraphfromOutput(ExampleNode3);
+
+
                     //StaticGraph<NodeFloat>* exportConvert = (StaticGraph<NodeFloat>*)testExport;
                     //NodeInteger* convert = (NodeInteger*)exportConvert->outputValue;
                     //std::cout << "COMPILE VALUE IS " << convert->value << "\n";
 
-                    ExportGraph(testExport);
-                    //ImportGraph();
+
+                    //ExportGraph(testExport);
+                    //ImportGraph(&NodeStack);
                     break;
                 }
                 case SDL_SCANCODE_SPACE:
@@ -1070,12 +1065,11 @@ int main(int argc, char* argv[])
             currentDragPort->offsetY = mouseY - currentDragPort->renderY;
         }
 
-
+        SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
         if (draggingNewPort)
         {
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
-            SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
             SDL_RenderDrawLine(rend, currentDragNewPortParent->port.renderX, currentDragNewPortParent->port.renderY, mouseX, mouseY);
         }
 
@@ -1093,7 +1087,6 @@ int main(int argc, char* argv[])
         {
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
-            SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
             SDL_RenderDrawLine(rend, currentDragNewFlow->renderX, currentDragNewFlow->renderY, mouseX, mouseY);
         }
 
@@ -1102,7 +1095,6 @@ int main(int argc, char* argv[])
         {
             Link* current = LinkStack[curLink];
 
-            SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
             SDL_RenderDrawLine(rend, current->LinkInput->port.renderX + current->LinkInput->port.offsetX, current->LinkInput->port.renderY + current->LinkInput->port.offsetY, current->LinkOutput->port.renderX + current->LinkOutput->port.offsetX, current->LinkOutput->port.renderY + current->LinkOutput->port.offsetY);
         }
 
@@ -1113,7 +1105,6 @@ int main(int argc, char* argv[])
                 ActionNode* curActionCast = (ActionNode*)curAction;
                 if (curActionCast->Next)
                 {
-                    SDL_SetRenderDrawColor(rend, 255, 255, 255, SDL_ALPHA_OPAQUE);
                     SDL_RenderDrawLine(rend, curActionCast->RightPort.renderX + curActionCast->RightPort.offsetX, curActionCast->RightPort.renderY + curActionCast->RightPort.offsetY, curActionCast->Next->LeftPort.renderX + curActionCast->Next->LeftPort.offsetX, curActionCast->Next->LeftPort.renderY + curActionCast->Next->LeftPort.offsetY);
                 }
             }
@@ -1592,7 +1583,6 @@ int main(int argc, char* argv[])
     // destroy texture 
     SDL_DestroyTexture(tex);
 
-    SDL_DestroyTexture(Nodetex);
     SDL_DestroyTexture(Porttex);
     SDL_DestroyTexture(Flowtex);
     // destroy renderer 

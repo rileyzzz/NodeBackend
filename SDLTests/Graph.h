@@ -56,7 +56,11 @@ public:
 		OutputNode = ExportableNode(outputNode);
 
 	}
+	DynamicGraph()
+	{
+
+	}
 };
 
 void ExportGraph(Graph* graphExport);
-Graph* ImportGraph();
+Graph* ImportGraph(std::vector<Node*>* inStack);

@@ -1,6 +1,7 @@
 #include "Graph.h"
 
 std::vector<ExportableNode*> curNodeStack;
+std::vector<ExportableNode*> importStack;
 
 void SetupTree(ExportableNode* inNode)
 {
@@ -15,6 +16,28 @@ void SetupTree(ExportableNode* inNode)
 				curNodeStack.push_back(nextNode);
 				SetupTree(nextNode);
 			}
+		}
+	}
+}
+
+void DeconstructTree(ExportableNode* mainOutput, std::ifstream* infile)
+{
+
+	if (!mainOutput->inputs.empty())
+	{
+		for (auto& curInput : mainOutput->inputs) {
+			//if (curInput.link.ParentNode)
+			//{
+
+			ExportableNode* nextNode = new ExportableNode;
+			infile->read((char*)nextNode, sizeof(ExportableNode));
+				
+			std::cout << "Read node " << nextNode->title << " from file.\n";
+			//order is important here - we want all input child objects to come after a parent
+			importStack.push_back(nextNode);
+			DeconstructTree(nextNode, infile);
+				//SetupTree(nextNode);
+			//}
 		}
 	}
 }
@@ -43,7 +66,7 @@ void ExportGraph(Graph* graphExport)
 			outfile.write((char*)curNode, sizeof(ExportableNode));
 		}
 
-		//loop through and write each input's referenced node
+		//loop through and write each input's referenced node?
 	}
 	else
 	{
@@ -85,7 +108,7 @@ void ExportGraph(Graph* graphExport)
 	outfile.close();
 }
 
-Graph* ImportGraph()
+Graph* ImportGraph(std::vector<Node*>* inStack)
 {
 	std::ifstream infile("C:/Users/riley/source/repos/SDLTests/x64/Debug/export.graph", std::ios::in | std::ios::binary);
 	const int size = infile.tellg();
@@ -102,6 +125,68 @@ Graph* ImportGraph()
 
 	if (*isDynamic)
 	{
+		importStack.clear();
+		DynamicGraph* createdGraph = new DynamicGraph;
+		infile.read((char*)createdGraph, sizeof(DynamicGraph));
+
+		DeconstructTree(&createdGraph->OutputNode, &infile);
+
+		std::cout << "read finished.\n";
+
+		std::cout << "Adding to scene...\n";
+
+		for (auto& curNode : importStack) {
+			std::cout << "curnode name is " << curNode->title << std::endl;
+			switch (curNode->type)
+			{
+			case Node::Node_Type::Node_Action:
+			{
+				break;
+			}
+			case Node::Node_Type::Node_Calculation:
+			{
+				std::cout << "Calculation node " << curNode->title << std::endl;
+				std::vector<Input*> inputs;
+				std::vector<Output*> outputs;
+				for (auto& curInput : curNode->inputs) {
+					DataPort newPort = DataPort(curInput.port.PortType);
+					//DataPort newPort = DataPort(Data::Data_Type::Float);
+					Input* createdInput = new Input(newPort);
+					//createdInput->port = curInput.port;
+					createdInput->type = curInput.type;
+					if (curInput.Linked)
+					{
+						//add the output to a stack and link the two later
+						
+					}
+					inputs.push_back(createdInput);
+				}
+
+				for (auto& curOutput : curNode->outputs) {
+					Output* createdOutput = new Output(curOutput.port);
+					createdOutput->port = curOutput.port;
+					createdOutput->type = curOutput.type;
+
+					outputs.push_back(createdOutput);
+				}
+
+				DataNode* NewNode = new DataNode(curNode->ID, curNode->type, inputs, outputs, curNode->title.c_str(), 300, 300, curNode->Calculate);
+
+				inStack->push_back(NewNode);
+				break;
+			}
+			case Node::Node_Type::Node_Event:
+			{
+				break;
+			}
+			case Node::Node_Type::Node_Input:
+			{
+				break;
+			}
+			}
+			//Node* copyNode = new Node;
+		
+		}
 
 	}
 	else
