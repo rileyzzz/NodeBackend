@@ -107,9 +107,13 @@ int main(int argc, char* argv[])
 {
     std::cout << "Starting SDL2\n";
 
+    bool Hint = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
+    if (Hint) std::cout << "Hint successful\n"; else std::cout << "Hint failed\n";
+
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("error initializing SDL: %s\n", SDL_GetError());
     }
+    
 
     int scrw = 1920;
     int scrh = 1080;
@@ -117,7 +121,7 @@ int main(int argc, char* argv[])
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         scrw, scrh, 0);
-
+    
     //int scrw = 3840;
     //int scrh = 2160;
     //SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
@@ -131,6 +135,8 @@ int main(int argc, char* argv[])
 
     // creates a renderer to render our images 
     SDL_Renderer* rend = SDL_CreateRenderer(win, -1, render_flags);
+
+    
 
     // creates a surface to load an image into the main memory 
     SDL_Surface* surface;
@@ -1195,7 +1201,8 @@ int main(int argc, char* argv[])
                         {
                             NodeBoolean* castData = (NodeBoolean*)CalculatedInput;
                             bool value = castData->value;
-                            Outputtext = std::to_string(value);
+                            if (value == true) Outputtext = "true";
+                            if (value == false) Outputtext = "false";
                             break;
                         }
                         case Data::Data_Type::Numeric:
