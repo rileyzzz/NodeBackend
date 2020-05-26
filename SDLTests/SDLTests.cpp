@@ -108,41 +108,40 @@ int main(int argc, char* argv[])
     std::cout << "Starting SDL2\n";
 
     bool Hint = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
-    if (Hint) std::cout << "Hint successful\n"; else std::cout << "Hint failed\n";
+    //if (Hint) std::cout << "Hint successful\n"; else std::cout << "Hint failed\n";
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("error initializing SDL: %s\n", SDL_GetError());
     }
     
 
-    int scrw = 1920;
-    int scrh = 1080;
+    int scrw = 2560;
+    int scrh = 1440;
     SDL_Window* win = SDL_CreateWindow("Node Editor", // creates a window 
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         scrw, scrh, 0);
-    
+
     //int scrw = 3840;
     //int scrh = 2160;
-    //SDL_Window* win = SDL_CreateWindow("NodeEditor", // creates a window 
+    //SDL_Window* win = SDL_CreateWindow("Node Editor", // creates a window 
     //    SDL_WINDOWPOS_CENTERED,
     //    SDL_WINDOWPOS_CENTERED,
     //    scrw, scrh, SDL_WINDOW_FULLSCREEN);
 
     // triggers the program that controls 
     // your graphics hardware and sets flags 
-    Uint32 render_flags = SDL_RENDERER_ACCELERATED;
-
+    Uint32 render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+    
     // creates a renderer to render our images 
     SDL_Renderer* rend = SDL_CreateRenderer(win, -1, render_flags);
 
-    
 
     // creates a surface to load an image into the main memory 
     SDL_Surface* surface;
 
     // please provide a path for your image 
-    surface = IMG_Load("C:/Users/riley/Pictures/grid.png");
+    surface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/grid2.png");
 
     // loads image to our graphics hardware memory. 
     SDL_Texture* tex = SDL_CreateTextureFromSurface(rend, surface);
@@ -348,7 +347,7 @@ int main(int argc, char* argv[])
     SDL_Rect Portdest;
     SDL_Surface* Portsurface;
     SDL_Surface* Flowsurface;
-    Portsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/io.png");
+    Portsurface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/io2.png");
     SDL_Texture* Porttex = SDL_CreateTextureFromSurface(rend, Portsurface);
     SDL_FreeSurface(Portsurface);
 
@@ -1036,8 +1035,10 @@ int main(int argc, char* argv[])
             }
         }
 
-        dest.w = 48 + 32 * zoomLevel;
-        dest.h = 48 + 32 * zoomLevel;
+        //dest.w = 64 + 256 * zoomLevel;
+        //dest.h = 64 + 256 * zoomLevel;
+        dest.w = 128 * (zoomLevel + 1);
+        dest.h = 128 * (zoomLevel + 1);
         // clears the screen 
         SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
         SDL_RenderClear(rend);
@@ -1057,10 +1058,6 @@ int main(int argc, char* argv[])
                 SDL_RenderCopy(rend, tex, NULL, &dest);
             }
         }
-
-        //set line scale
-        int lineScale = 2;
-
         
         if (draggingPort)
         {
@@ -1154,7 +1151,7 @@ int main(int argc, char* argv[])
                 SDL_RenderFillRect(rend, &SelectionBG);
             }
 
-            SDL_SetRenderDrawColor(rend, 40, 40, 50, 255);
+            SDL_SetRenderDrawColor(rend, 35, 35, 54, 255);
             SDL_RenderFillRect(rend, &NodeElement);
 
             //Render text
@@ -1163,7 +1160,7 @@ int main(int argc, char* argv[])
             TTF_Font* Sans = TTF_OpenFont("C:/Users/riley/source/repos/SDLTests/x64/Debug/arial.ttf", 12 * globalScaleFactor); //this opens a font style and sets a size
 
 
-            SDL_Color White = { 255, 255, 255 };  // this is the color in rgb format, maxing out all would give you the color white, and it will be your text's color
+            SDL_Color White = { 240, 240, 240 };  // this is the color in rgb format, maxing out all would give you the color white, and it will be your text's color
 
             const char* text = curNode->title;
             SDL_Surface* nodeMessage = TTF_RenderText_Solid(Sans, text, White); // as TTF_RenderText_Solid could only be used on SDL_Surface then you have to create the surface first
