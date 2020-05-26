@@ -115,19 +115,19 @@ int main(int argc, char* argv[])
     }
     
 
-    //int scrw = 2560;
-    //int scrh = 1440;
-    //SDL_Window* win = SDL_CreateWindow("Node Editor", // creates a window 
-    //    SDL_WINDOWPOS_CENTERED,
-    //    SDL_WINDOWPOS_CENTERED,
-    //    scrw, scrh, 0);
-
-    int scrw = 3840;
-    int scrh = 2160;
+    int scrw = 2560;
+    int scrh = 1440;
     SDL_Window* win = SDL_CreateWindow("Node Editor", // creates a window 
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        scrw, scrh, SDL_WINDOW_FULLSCREEN);
+        scrw, scrh, 0);
+
+    //int scrw = 3840;
+    //int scrh = 2160;
+    //SDL_Window* win = SDL_CreateWindow("Node Editor", // creates a window 
+    //    SDL_WINDOWPOS_CENTERED,
+    //    SDL_WINDOWPOS_CENTERED,
+    //    scrw, scrh, SDL_WINDOW_FULLSCREEN);
 
     // triggers the program that controls 
     // your graphics hardware and sets flags 
