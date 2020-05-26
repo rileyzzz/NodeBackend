@@ -115,19 +115,19 @@ int main(int argc, char* argv[])
     }
     
 
-    int scrw = 2560;
-    int scrh = 1440;
-    SDL_Window* win = SDL_CreateWindow("Node Editor", // creates a window 
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        scrw, scrh, 0);
-
-    //int scrw = 3840;
-    //int scrh = 2160;
+    //int scrw = 2560;
+    //int scrh = 1440;
     //SDL_Window* win = SDL_CreateWindow("Node Editor", // creates a window 
     //    SDL_WINDOWPOS_CENTERED,
     //    SDL_WINDOWPOS_CENTERED,
-    //    scrw, scrh, SDL_WINDOW_FULLSCREEN);
+    //    scrw, scrh, 0);
+
+    int scrw = 3840;
+    int scrh = 2160;
+    SDL_Window* win = SDL_CreateWindow("Node Editor", // creates a window 
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        scrw, scrh, SDL_WINDOW_FULLSCREEN);
 
     // triggers the program that controls 
     // your graphics hardware and sets flags 
@@ -258,9 +258,9 @@ int main(int argc, char* argv[])
 
     //Example Action Graph
     std::vector<DataPort> EventinPorts{  };
-    std::vector<DataPort> EventoutPorts{ DataPort(Data::Data_Type::String) };
+    std::vector<DataPort> EventoutPorts{  };
     std::vector<Input*> EventnodeInputs;
-    std::vector<Output*> EventnodeOutputs = CreateOutputs(EventoutPorts);
+    std::vector<Output*> EventnodeOutputs;
 
     ActionNode* EventExampleNode = CreateActionNode(Node::Node_Type::Node_Event, EventnodeInputs, EventnodeOutputs, "Key Enter", ActionNode::ActionType::RightOutput, 0, 200);
 
@@ -276,11 +276,10 @@ int main(int argc, char* argv[])
     LinkActionNodes(EventExampleNode, PrintExampleNode);
 
     //Link the IO string
-    //PrintExampleNode->inputs[0]->link = EventExampleNode->outputs[0];
-    LinkStack.push_back(new Link(PrintExampleNode, 0, EventExampleNode, 0));
+    //LinkStack.push_back(new Link(PrintExampleNode, 0, EventExampleNode, 0));
 
     //Once again, event input data is managed through the InputData variable, since an event can also act as an input - completely optional
-    EventExampleNode->InputData = new NodeString("Testing from the Event node!");
+    //EventExampleNode->InputData = new NodeString("Testing from the Event node!");
 
 
     std::vector<DataPort> strinPorts{  };
