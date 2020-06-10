@@ -1,11 +1,13 @@
 #pragma once
 #include "Node.h"
 #include "Graph.h"
-class GraphCompiler
+namespace NodeEdit
 {
-private:
-	static bool DetermineDynamic(Node* ParentNode);
-public:
-	static Graph* CompileGraphfromOutput(Node* outputNode);
-};
-
+	class GraphCompiler
+	{
+	private:
+		static bool DetermineDynamic(Node* ParentNode);
+	public:
+		static Graph* CompileGraphfromOutput(Node* outputNode);
+	};
+}

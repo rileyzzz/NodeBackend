@@ -1,5 +1,4 @@
-// SDLTests.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+// SDLTests.cpp : An example implementation of the node system using SDL
 
 #include <iostream>
 #include "SDL.h"
@@ -7,14 +6,19 @@
 #include <SDL_timer.h> 
 #include <math.h>  
 #include <vector>
-#include "Node.h"
-#include "NodeHelpers.h"
-#include "StandardNodes.h"
 #include "SDL_ttf.h"
 #include <string>
 #include <algorithm>
+
+#include "Node.h"
+#include "NodeHelpers.h"
+#include "StandardNodes.h"
 #include "GraphCompiler.h"
+
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+
+//I'm aware this is pretty bad practice, but this is just so I don't pull my hair out
+using namespace NodeEdit;
 
 //each programmable object will contain a nodestack and id count that persist
 int IDcount = 0;
@@ -33,6 +37,7 @@ int globalScaleFactor = 1;
 bool DrawNodeOutput = true;
 bool ctrlHeld = false;
 
+//helper functions
 DataNode* CreateNode(Node::Node_Type type, std::vector<Input*> inputs, std::vector<Output*> outputs, const char* title, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
 {
     DataNode* NewNode = new DataNode(IDcount, type, inputs, outputs, title, x, y, f);
@@ -80,14 +85,12 @@ ActionNode* CreateActionNode(Node::Node_Type type, std::vector<Input*> inputs, s
 
 void GetScreenCoordinates(int x, int y, int* sendX, int* sendY)
 {
-    //int returnarr[2];
     *sendX = (gridoffsetX + MMoffsetX) + x * globalScaleFactor;
     *sendY = (gridoffsetY + MMoffsetY) + y * globalScaleFactor;
 }
 
 void GetGridCoordinates(int x, int y, int* sendX, int* sendY)
 {
-    //int returnarr[2];
     *sendX = (x - (gridoffsetX + MMoffsetX)) / globalScaleFactor;
     *sendY = (y - (gridoffsetY + MMoffsetY)) / globalScaleFactor;
 }
@@ -107,8 +110,7 @@ int main(int argc, char* argv[])
 {
     std::cout << "Starting SDL2\n";
 
-    bool Hint = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
-    //if (Hint) std::cout << "Hint successful\n"; else std::cout << "Hint failed\n";
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("error initializing SDL: %s\n", SDL_GetError());
@@ -129,31 +131,14 @@ int main(int argc, char* argv[])
     //    SDL_WINDOWPOS_CENTERED,
     //    scrw, scrh, SDL_WINDOW_FULLSCREEN);
 
-    // triggers the program that controls 
-    // your graphics hardware and sets flags 
     Uint32 render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
-    
-    // creates a renderer to render our images 
     SDL_Renderer* rend = SDL_CreateRenderer(win, -1, render_flags);
-
-
-    // creates a surface to load an image into the main memory 
     SDL_Surface* surface;
-
-    // please provide a path for your image 
     surface = IMG_Load("C:/Users/riley/source/repos/SDLTests/x64/Debug/grid2.png");
-
-    // loads image to our graphics hardware memory. 
     SDL_Texture* tex = SDL_CreateTextureFromSurface(rend, surface);
-
-    // clears main-memory 
     SDL_FreeSurface(surface);
 
-    // let us control our image position 
-    // so that we can move it with our keyboard. 
     SDL_Rect dest;
-
-    // connects our texture with dest to control position 
     SDL_QueryTexture(tex, NULL, NULL, &dest.w, &dest.h);
     
     int close = 0;
@@ -184,6 +169,7 @@ int main(int argc, char* argv[])
     bool draggingNewFlow = false;
     DataFlow* currentDragNewFlow = nullptr;
 
+    //My context menu is a simple class that shouldn't be used often
     ContextMenu* RightClickContext = GenerateContextMenu();
     bool ContextMenuOpen = false;
     int ContextX, ContextY;
@@ -192,7 +178,7 @@ int main(int argc, char* argv[])
         OptionStack.insert(OptionStack.end(), value->Options.begin(), value->Options.end());
     }
 
-    //Create example node
+    //Create example nodes
     std::vector<DataPort> inPorts{  };
     std::vector<DataPort> outPorts{ DataPort(Data::Data_Type::Integer) };
     std::vector<Input*> nodeInputs;
@@ -1569,14 +1555,12 @@ int main(int argc, char* argv[])
                 
                 
             }
-            //const char* text = lineText.c_str();
-            
         }
 
         TTF_CloseFont(ConsoleFont);
+
+
         //End Draw
-        // triggers the double buffers 
-        // for multiple rendering 
         SDL_RenderPresent(rend);
 
         // calculates to 60 fps 

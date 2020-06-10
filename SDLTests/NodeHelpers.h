@@ -6,54 +6,57 @@
 #include <cstdarg>
 #include <locale>
 
-std::vector<Input*> CreateInputs(std::vector<DataPort> itemarray);
-
-std::vector<Output*> CreateOutputs(std::vector<DataPort> itemarray);
-
-Data* CalculateLinkChain(Output* srcLink);
-
-void Unlink(Link* inLink);
-
-Data* GetNodeDefault(Data::Data_Type intype);
-
-//basic example
-ContextMenu* GenerateContextMenu();
-
-const char* myToUppercase(const char* in);
-
-template <class I>
-void AddCustomEmptyCalculation(ContextCategory* inCM, const char* name, I(*f)())
+namespace NodeEdit
 {
-    //va_list ap;
-    //va_start(ap);
+    std::vector<Input*> CreateInputs(std::vector<DataPort> itemarray);
 
-    auto buildfunc = [f]()
+    std::vector<Output*> CreateOutputs(std::vector<DataPort> itemarray);
+
+    Data* CalculateLinkChain(Output* srcLink);
+
+    void Unlink(Link* inLink);
+
+    Data* GetNodeDefault(Data::Data_Type intype);
+
+    //basic example
+    ContextMenu* GenerateContextMenu();
+
+    const char* myToUppercase(const char* in);
+
+    template <class I>
+    void AddCustomEmptyCalculation(ContextCategory* inCM, const char* name, I(*f)())
     {
-        I returnvalue = f();
-        NodeWeird<I>* returnnode = new NodeWeird<I>(returnvalue);
-        Data* convertnode = (Data*)returnnode;
-        return convertnode;
-    };
+        //va_list ap;
+        //va_start(ap);
 
-    inCM->Options.push_back(new NodeCreator(Node::Node_Type::Node_Input,
-        {  },
-        { DataPort(Data::Data_Type::Weird) }, name, inCM, buildfunc));
-}
-//I - function final output type, T - function required input type
-template <class I, class T>
-void AddCustomStandardCalculation(ContextCategory* inCM, const char* name, I(*f)(T))
-{
+        auto buildfunc = [f]()
+        {
+            I returnvalue = f();
+            NodeWeird<I>* returnnode = new NodeWeird<I>(returnvalue);
+            Data* convertnode = (Data*)returnnode;
+            return convertnode;
+        };
 
-    auto buildfunc = [f](Data* argument)
+        inCM->Options.push_back(new NodeCreator(Node::Node_Type::Node_Input,
+            {  },
+            { DataPort(Data::Data_Type::Weird) }, name, inCM, buildfunc));
+    }
+    //I - function final output type, T - function required input type
+    template <class I, class T>
+    void AddCustomStandardCalculation(ContextCategory* inCM, const char* name, I(*f)(T))
     {
-        NodeWeird<T>* convertedargument = (NodeWeird<T>*)argument;
-        I returnvalue = f(convertedargument->value);
-        NodeWeird<I>* returnnode = new NodeWeird<I>(returnvalue);
-        Data* convertnode = (Data*)returnnode;
-        return convertnode;
-    };
 
-    inCM->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
-        { DataPort(Data::Data_Type::Weird) },
-        { DataPort(Data::Data_Type::Weird) }, name, inCM, buildfunc));
+        auto buildfunc = [f](Data* argument)
+        {
+            NodeWeird<T>* convertedargument = (NodeWeird<T>*)argument;
+            I returnvalue = f(convertedargument->value);
+            NodeWeird<I>* returnnode = new NodeWeird<I>(returnvalue);
+            Data* convertnode = (Data*)returnnode;
+            return convertnode;
+        };
+
+        inCM->Options.push_back(new NodeCreator(Node::Node_Type::Node_Calculation,
+            { DataPort(Data::Data_Type::Weird) },
+            { DataPort(Data::Data_Type::Weird) }, name, inCM, buildfunc));
+    }
 }

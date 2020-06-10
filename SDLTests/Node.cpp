@@ -1,46 +1,49 @@
 #include "Node.h"
 #include "NodeHelpers.h"
 
-Data* Node::CalculateInputs()
+namespace NodeEdit
 {
-    //CalculatedInputs.clear();
-    std::vector<Data*> sendInputs;
-    //Loop through every input required for our output node.
-    for (auto& nodeInput : inputs) 
+    Data* Node::CalculateInputs()
     {
+        //CalculatedInputs.clear();
+        std::vector<Data*> sendInputs;
+        //Loop through every input required for our output node.
+        for (auto& nodeInput : inputs)
+        {
 
-        //Recursion through entire link tree.
-        if (nodeInput->link)
-        {
-            sendInputs.push_back(CalculateLinkChain(nodeInput->link));
+            //Recursion through entire link tree.
+            if (nodeInput->link)
+            {
+                sendInputs.push_back(CalculateLinkChain(nodeInput->link));
+            }
+            else
+            {
+                sendInputs.push_back(GetNodeDefault(nodeInput->port.PortType));
+            }
         }
-        else
-        {
-            sendInputs.push_back(GetNodeDefault(nodeInput->port.PortType));
-        }
+        //returns the first calculated input, for ease of use with basic output nodes.
+        //this does however support multiple inputs, simply access the CalculatedInputs vector.
+        CalculatedInputs = sendInputs;
+        return sendInputs[0];
     }
-    //returns the first calculated input, for ease of use with basic output nodes.
-    //this does however support multiple inputs, simply access the CalculatedInputs vector.
-    CalculatedInputs = sendInputs;
-    return sendInputs[0];
-}
 
-void ActionNode::Run()
-{
-    if (type == Node::Node_Type::Node_Action)
+    void ActionNode::Run()
     {
-        //Do our predefined action.
-        if (inputs.size())
+        if (type == Node::Node_Type::Node_Action)
         {
-            CalculateInputs();
+            //Do our predefined action.
+            if (inputs.size())
+            {
+                CalculateInputs();
+            }
+            RunCalled(CalculatedInputs);
         }
-        RunCalled(CalculatedInputs);
+        //Our node has been called.
+        if (Next)
+        {
+            //Continue the chain.
+            Next->Run();
+        }
+        //Optional case where there is more than one output - should be run as part of the RunCalled function
     }
-    //Our node has been called.
-    if (Next)
-    {
-        //Continue the chain.
-        Next->Run();
-    }
-    //Optional case where there is more than one output - should be run as part of the RunCalled function
 }

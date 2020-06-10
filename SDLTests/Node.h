@@ -4,55 +4,58 @@
 #include "NodeDrawable.h"
 #include <iostream>
 #include <functional>
-class Input;
-class Output;
-class Node;
-class Linkable;
-class Link;
-class DataFlow;
 
-class Linkable
+namespace NodeEdit
 {
-public:
-	Node* ParentNode;
-	const char* Label;
-	DataPort port;
-	enum class Link_Type {
-		Input,
-		Output
+	class Input;
+	class Output;
+	class Node;
+	class Linkable;
+	class Link;
+	class DataFlow;
+
+	class Linkable
+	{
+	public:
+		Node* ParentNode;
+		const char* Label;
+		DataPort port;
+		enum class Link_Type {
+			Input,
+			Output
+		};
+		Link_Type type;
+		Link* currentLink;
 	};
-	Link_Type type;
-	Link* currentLink;
-};
-class Input : public Linkable
-{
-public:
-	Output* link;
-	
-	Input(DataPort subPort, const char* InLabel = "Input")
+	class Input : public Linkable
 	{
-		port = subPort;
-		link = nullptr;
-		Label = InLabel;
-		type = Linkable::Link_Type::Input;
-		currentLink = nullptr;
-	}
-};
-class Output : public Linkable
-{
-public:
-	Input* link;
-	Output(DataPort subPort, const char* InLabel = "Output")
+	public:
+		Output* link;
+
+		Input(DataPort subPort, const char* InLabel = "Input")
+		{
+			port = subPort;
+			link = nullptr;
+			Label = InLabel;
+			type = Linkable::Link_Type::Input;
+			currentLink = nullptr;
+		}
+	};
+	class Output : public Linkable
 	{
-		port = subPort;
-		link = nullptr;
-		Label = InLabel;
-		type = Linkable::Link_Type::Output;
-		currentLink = nullptr;
-	}
-};
-class Node
-{
+	public:
+		Input* link;
+		Output(DataPort subPort, const char* InLabel = "Output")
+		{
+			port = subPort;
+			link = nullptr;
+			Label = InLabel;
+			type = Linkable::Link_Type::Output;
+			currentLink = nullptr;
+		}
+	};
+	class Node
+	{
 	public:
 		enum class Node_Type {
 			Node_Event,
@@ -66,7 +69,7 @@ class Node
 
 		std::vector<Input*> inputs;
 		std::vector<Output*> outputs;
-		
+
 		bool Selected;
 
 		const char* title;
@@ -80,8 +83,8 @@ class Node
 		Data* InputData;
 
 
-		std::function<Data * ()> weirdCalculate;
-		std::function<Data * (Data*)> weirdCalculateWithArg;
+		std::function<Data* ()> weirdCalculate;
+		std::function<Data* (Data*)> weirdCalculateWithArg;
 
 		bool dynamic = false;
 
@@ -95,248 +98,249 @@ class Node
 
 
 		Data* CalculateInputs();
-};
-
-class DataNode : public Node
-{
-public:
-	DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
-	{
-		ID = givenID;
-		type = givenType;
-		inputs = givenInputs;
-		outputs = givenOutputs;
-		//set IO parents
-		if (inputs.size())
-		{
-			for (int iter = 0; iter < inputs.size(); iter++)
-			{
-				inputs[iter]->ParentNode = this;
-			}
-		}
-		if (outputs.size())
-		{
-			for (int iter = 0; iter < outputs.size(); iter++)
-			{
-				outputs[iter]->ParentNode = this;
-			}
-		}
-
-		if (f)
-		{
-			Calculate = (*f);
-		}
-
-		title = givenTitle;
-		renderable = new NodeDrawable();
-		renderable->x = x;
-		renderable->y = y;
-		Selected = false;
-		//std::cout << "Created node " << title << ".\n";
-	}
-	DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, Data* (*f)(void) = nullptr)
-	{
-		ID = givenID;
-		type = givenType;
-		inputs = givenInputs;
-		outputs = givenOutputs;
-		//set IO parents
-		if (inputs.size())
-		{
-			for (int iter = 0; iter < inputs.size(); iter++)
-			{
-				inputs[iter]->ParentNode = this;
-			}
-		}
-		if (outputs.size())
-		{
-			for (int iter = 0; iter < outputs.size(); iter++)
-			{
-				outputs[iter]->ParentNode = this;
-			}
-		}
-
-		if (f)
-		{
-			InputCalculate = (*f);
-		}
-
-		title = givenTitle;
-		renderable = new NodeDrawable();
-		renderable->x = x;
-		renderable->y = y;
-		Selected = false;
-		//std::cout << "Created node " << title << ".\n";
-	}
-	//Weird Input
-	DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, std::function<Data * ()> f, int x = 0, int y = 0)
-	{
-		ID = givenID;
-		type = givenType;
-		inputs = givenInputs;
-		outputs = givenOutputs;
-		//set IO parents
-		if (inputs.size())
-		{
-			for (int iter = 0; iter < inputs.size(); iter++)
-			{
-				inputs[iter]->ParentNode = this;
-			}
-		}
-		if (outputs.size())
-		{
-			for (int iter = 0; iter < outputs.size(); iter++)
-			{
-				outputs[iter]->ParentNode = this;
-			}
-		}
-
-		weirdCalculate = f;
-
-
-		title = givenTitle;
-		renderable = new NodeDrawable();
-		renderable->x = x;
-		renderable->y = y;
-		Selected = false;
-		//std::cout << "Created node " << title << ".\n";
-	}
-	//Weird Calc
-	DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, std::function<Data * (Data*)> f, int x = 0, int y = 0)
-	{
-		ID = givenID;
-		type = givenType;
-		inputs = givenInputs;
-		outputs = givenOutputs;
-		//set IO parents
-		if (inputs.size())
-		{
-			for (int iter = 0; iter < inputs.size(); iter++)
-			{
-				inputs[iter]->ParentNode = this;
-			}
-		}
-		if (outputs.size())
-		{
-			for (int iter = 0; iter < outputs.size(); iter++)
-			{
-				outputs[iter]->ParentNode = this;
-			}
-		}
-
-		weirdCalculateWithArg = f;
-
-
-		title = givenTitle;
-		renderable = new NodeDrawable();
-		renderable->x = x;
-		renderable->y = y;
-		Selected = false;
-		//std::cout << "Created node " << title << ".\n";
-	}
-};
-
-class DataFlow : public DataPort
-{
-public:
-	Node* parent;
-};
-
-class ActionNode : public Node
-{
-public:
-	//Action nodes are a bit different; they can also have a predefined next and previous. Since only one input can be linked per IO, it is a sequence. They can, however, have several action outputs, so we must account for this.
-	//They will take a boolean 
-	ActionNode* Previous;
-	ActionNode* Next;
-
-	//Optional - can be called by the run function
-	std::vector<ActionNode*> OutputActions;
-
-	typedef bool (*RunFunc)(std::vector<Data*>);
-	RunFunc RunCalled;
-
-	void Run();
-
-	enum class ActionType {
-		DoubleSided,
-		RightOutput,
-		LeftInput,
-		Special
 	};
 
-	ActionType FlowType;
-
-	DataFlow LeftPort;
-	DataFlow RightPort;
-
-	ActionNode(int givenID, Node::Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, ActionType inFlow, int x = 0, int y = 0, bool (*f)(std::vector<Data*>) = nullptr)
+	class DataNode : public Node
 	{
-		ID = givenID;
-		type = givenType;
-		inputs = givenInputs;
-		outputs = givenOutputs;
-		FlowType = inFlow;
-
-
-		LeftPort.parent = this;
-		RightPort.parent = this;
-		//set IO parents
-		if (inputs.size())
+	public:
+		DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, Data* (*f)(std::vector<Data*>) = nullptr)
 		{
-			for (int iter = 0; iter < inputs.size(); iter++)
+			ID = givenID;
+			type = givenType;
+			inputs = givenInputs;
+			outputs = givenOutputs;
+			//set IO parents
+			if (inputs.size())
 			{
-				inputs[iter]->ParentNode = this;
+				for (int iter = 0; iter < inputs.size(); iter++)
+				{
+					inputs[iter]->ParentNode = this;
+				}
 			}
-		}
-		if (outputs.size())
-		{
-			for (int iter = 0; iter < outputs.size(); iter++)
+			if (outputs.size())
 			{
-				outputs[iter]->ParentNode = this;
+				for (int iter = 0; iter < outputs.size(); iter++)
+				{
+					outputs[iter]->ParentNode = this;
+				}
 			}
-		}
 
-		if (f)
+			if (f)
+			{
+				Calculate = (*f);
+			}
+
+			title = givenTitle;
+			renderable = new NodeDrawable();
+			renderable->x = x;
+			renderable->y = y;
+			Selected = false;
+			//std::cout << "Created node " << title << ".\n";
+		}
+		DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, int x = 0, int y = 0, Data* (*f)(void) = nullptr)
 		{
-			RunCalled = (*f);
+			ID = givenID;
+			type = givenType;
+			inputs = givenInputs;
+			outputs = givenOutputs;
+			//set IO parents
+			if (inputs.size())
+			{
+				for (int iter = 0; iter < inputs.size(); iter++)
+				{
+					inputs[iter]->ParentNode = this;
+				}
+			}
+			if (outputs.size())
+			{
+				for (int iter = 0; iter < outputs.size(); iter++)
+				{
+					outputs[iter]->ParentNode = this;
+				}
+			}
+
+			if (f)
+			{
+				InputCalculate = (*f);
+			}
+
+			title = givenTitle;
+			renderable = new NodeDrawable();
+			renderable->x = x;
+			renderable->y = y;
+			Selected = false;
+			//std::cout << "Created node " << title << ".\n";
 		}
+		//Weird Input
+		DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, std::function<Data* ()> f, int x = 0, int y = 0)
+		{
+			ID = givenID;
+			type = givenType;
+			inputs = givenInputs;
+			outputs = givenOutputs;
+			//set IO parents
+			if (inputs.size())
+			{
+				for (int iter = 0; iter < inputs.size(); iter++)
+				{
+					inputs[iter]->ParentNode = this;
+				}
+			}
+			if (outputs.size())
+			{
+				for (int iter = 0; iter < outputs.size(); iter++)
+				{
+					outputs[iter]->ParentNode = this;
+				}
+			}
 
-		title = givenTitle;
-		renderable = new NodeDrawable();
-		renderable->x = x;
-		renderable->y = y;
-		Selected = false;
-		//std::cout << "Created node " << title << ".\n";
-	}
-};
+			weirdCalculate = f;
 
 
+			title = givenTitle;
+			renderable = new NodeDrawable();
+			renderable->x = x;
+			renderable->y = y;
+			Selected = false;
+			//std::cout << "Created node " << title << ".\n";
+		}
+		//Weird Calc
+		DataNode(int givenID, Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, std::function<Data* (Data*)> f, int x = 0, int y = 0)
+		{
+			ID = givenID;
+			type = givenType;
+			inputs = givenInputs;
+			outputs = givenOutputs;
+			//set IO parents
+			if (inputs.size())
+			{
+				for (int iter = 0; iter < inputs.size(); iter++)
+				{
+					inputs[iter]->ParentNode = this;
+				}
+			}
+			if (outputs.size())
+			{
+				for (int iter = 0; iter < outputs.size(); iter++)
+				{
+					outputs[iter]->ParentNode = this;
+				}
+			}
 
-class Link
-{
-	//Calc nodes only!
-public:
-	Input* LinkInput;
-	Output* LinkOutput;
-	Link(Node* node1, int node1input, Node* node2, int node2input)
+			weirdCalculateWithArg = f;
+
+
+			title = givenTitle;
+			renderable = new NodeDrawable();
+			renderable->x = x;
+			renderable->y = y;
+			Selected = false;
+			//std::cout << "Created node " << title << ".\n";
+		}
+	};
+
+	class DataFlow : public DataPort
 	{
-		LinkInput = node1->inputs[node1input];
-		LinkOutput = node2->outputs[node2input];
-		node1->inputs[node1input]->link = node2->outputs[node2input];
-		node2->outputs[node2input]->link = node1->inputs[node1input];
+	public:
+		Node* parent;
+	};
 
-		node1->inputs[node1input]->currentLink = this;
-		node2->outputs[node2input]->currentLink = this;
-	}
-	Link(Output* node1input, Input* node2input)
+	class ActionNode : public Node
 	{
-		LinkInput = node2input;
-		LinkOutput = node1input;
-		node1input->link = node2input;
-		node2input->link = node1input;
+	public:
+		//Action nodes are a bit different; they can also have a predefined next and previous. Since only one input can be linked per IO, it is a sequence. They can, however, have several action outputs, so we must account for this.
+		//They will take a boolean 
+		ActionNode* Previous;
+		ActionNode* Next;
 
-		node1input->currentLink = this;
-		node2input->currentLink = this;
-	}
-};
+		//Optional - can be called by the run function
+		std::vector<ActionNode*> OutputActions;
+
+		typedef bool (*RunFunc)(std::vector<Data*>);
+		RunFunc RunCalled;
+
+		void Run();
+
+		enum class ActionType {
+			DoubleSided,
+			RightOutput,
+			LeftInput,
+			Special
+		};
+
+		ActionType FlowType;
+
+		DataFlow LeftPort;
+		DataFlow RightPort;
+
+		ActionNode(int givenID, Node::Node_Type givenType, std::vector<Input*> givenInputs, std::vector<Output*> givenOutputs, const char* givenTitle, ActionType inFlow, int x = 0, int y = 0, bool (*f)(std::vector<Data*>) = nullptr)
+		{
+			ID = givenID;
+			type = givenType;
+			inputs = givenInputs;
+			outputs = givenOutputs;
+			FlowType = inFlow;
+
+
+			LeftPort.parent = this;
+			RightPort.parent = this;
+			//set IO parents
+			if (inputs.size())
+			{
+				for (int iter = 0; iter < inputs.size(); iter++)
+				{
+					inputs[iter]->ParentNode = this;
+				}
+			}
+			if (outputs.size())
+			{
+				for (int iter = 0; iter < outputs.size(); iter++)
+				{
+					outputs[iter]->ParentNode = this;
+				}
+			}
+
+			if (f)
+			{
+				RunCalled = (*f);
+			}
+
+			title = givenTitle;
+			renderable = new NodeDrawable();
+			renderable->x = x;
+			renderable->y = y;
+			Selected = false;
+			//std::cout << "Created node " << title << ".\n";
+		}
+	};
+
+
+
+	class Link
+	{
+		//Calc nodes only!
+	public:
+		Input* LinkInput;
+		Output* LinkOutput;
+		Link(Node* node1, int node1input, Node* node2, int node2input)
+		{
+			LinkInput = node1->inputs[node1input];
+			LinkOutput = node2->outputs[node2input];
+			node1->inputs[node1input]->link = node2->outputs[node2input];
+			node2->outputs[node2input]->link = node1->inputs[node1input];
+
+			node1->inputs[node1input]->currentLink = this;
+			node2->outputs[node2input]->currentLink = this;
+		}
+		Link(Output* node1input, Input* node2input)
+		{
+			LinkInput = node2input;
+			LinkOutput = node1input;
+			node1input->link = node2input;
+			node2input->link = node1input;
+
+			node1input->currentLink = this;
+			node2input->currentLink = this;
+		}
+	};
+}
