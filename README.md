@@ -6,5 +6,6 @@ A "weird" data type is included as a simpler way to interface between C++ functi
 Exporting graphs is currently unfinished, but is intended to determine whether a graph is "static" or "dynamic" on export, so its output values don't need to be recalculated constantly if they're unchanging.
 
 SDLTests is a sample implementation of the system for testing purposes, but isn't recommended for use and might not compile well.
+Note that this is very old code and is likely to have a few memory leaks.
 
 ![image](https://www.dropbox.com/s/kn0szbe2v6xaqmf/nodeeditor.PNG?raw=1)
